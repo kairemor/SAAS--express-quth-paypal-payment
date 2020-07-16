@@ -9,17 +9,16 @@
       "url": "https://opensource.org/licenses/MIT"
     }
   },
-  "servers": ["localhost:3000", "node-api-auth.herokuapp.com"],
+  "servers": [
+    {"url": "http://localhost:3000"}, 
+    {"url": "https://node-api-auth.herokuapp.com"}
+  ],
   "basePath": "/api/v1",
   "tags": [
     {
       "name": "Users",
       "description": "API for users in the system"
     }
-  ],
-  "schemes": [
-    "http",
-    "https"
   ],
   "consumes": [
     "application/json"
