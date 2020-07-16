@@ -4,7 +4,8 @@
   "description": "node api",
   "main": "src/index.js",
   "scripts": {
-    "start:dev": "nodemon --exec babel-node ./src/index.js"
+    "start:dev": "nodemon --exec babel-node ./src/index.js",
+    "start": "node --exec babel-node ./src/index.js"
   },
   "author": "KMTC",
   "license": "ISC",
