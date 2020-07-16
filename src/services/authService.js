@@ -2,15 +2,29 @@ import Model from "../models";
 import _ from "lodash";
 import { findOrCreate } from "./index";
 import { hashPassword } from "../lib/passwordOp";
+import { validateEmail } from "../lib/utils";
 import catchAsync from "../lib/catchAsync";
 
 const { Account } = Model;
 
 export const signupService = catchAsync(async (req, res, next) => {
+  if (req.body.password != req.body.confirmPassword) {
+    return res.status(400).json({
+      status: "error",
+      message: "password and passwordConfirm are not the same"
+    });
+  }
   const password = await hashPassword(req.body.password);
 
   const email = req.body.email.toLowerCase();
-  
+
+  if (!validateEmail(email)) {
+    return res.status(400).json({
+      status: "error",
+      message: "email is not correct"
+    });
+  }
+
   const [account, created] = await findOrCreate(Account, {
     ...req.body,
     password,
