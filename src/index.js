@@ -7,6 +7,7 @@ import openApiDocumentation from '../openApiDocumentation.json';
 import apiRouter from "./routes";
 import errorHandler from "./lib/globalErrorHandler";
 import GlobalError from "./lib/globalError";
+import models from './models'
 
 const app = express();
 dotenv.config();
@@ -31,6 +32,10 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`server listen at port ${PORT}`);
-});
+// sync() will create all table if they doesn't exist in database
+models.sequelize.sync().then(() => {
+  app.listen(PORT, () => {
+    console.log(`server listen at port ${PORT}`);
+  });
+})
+

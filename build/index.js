@@ -18,6 +18,8 @@ var _globalErrorHandler = _interopRequireDefault(require("./lib/globalErrorHandl
 
 var _globalError = _interopRequireDefault(require("./lib/globalError"));
 
+var _models = _interopRequireDefault(require("./models"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const app = (0, _express.default)();
@@ -34,7 +36,10 @@ app.all("*", async (req, res, next) => {
   next(err);
 });
 app.use(_globalErrorHandler.default);
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`server listen at port ${PORT}`);
+const PORT = process.env.PORT || 3000; // sync() will create all table if they doesn't exist in database
+
+_models.default.sequelize.sync().then(() => {
+  app.listen(PORT, () => {
+    console.log(`server listen at port ${PORT}`);
+  });
 });
