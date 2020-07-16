@@ -11,7 +11,8 @@
     "dev": "NODE_ENV=development npm-run-all build server",
     "prod": "NODE_ENV=production npm-run-all build server",
     "watch:dev": "nodemon",
-    "start": "npm run prod"
+    "start": "npm run prod",
+    "start:dev": "nodemon --exec babel-node src/index.js"
   },
   "nodemonConfig": {
     "exec": "npm run dev",
