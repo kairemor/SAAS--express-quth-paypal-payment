@@ -1,8 +1,8 @@
 import uuid from "uuid/v4";
 
 module.exports = (sequelize, DataTypes) => {
-  const Account = sequelize.define(
-    "Account",
+  const User = sequelize.define(
+    "User",
     {
       id: {
         allowNull: false,
@@ -31,20 +31,21 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: false
       },
-      blocked: {
+      isAdmin :{
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false
       },
-      changedPassword: {
-        type: DataTypes.STRING,
-        allowNull: true
+      blocked: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
       }
     },
     {}
   );
-  Account.associate = () => {
+  User.associate = () => {
     // associations can be defined here
   };
-  return Account;
+  return User;
 };

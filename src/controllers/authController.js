@@ -1,34 +1,31 @@
 import _ from "lodash";
-import { signupService } from "../services/authService";
-import { createTokens } from "../lib/generateToken";
+import { signupService, signUpValidation } from "../services/authService";
 import catchAsync from "../lib/catchAsync";
-import { createCookie } from "../lib/createCookie";
+import {getToken} from '../lib/authenticate';
+
 
 export const signupController = catchAsync(async (req, res, next) => {
   await signupService(req, res, next);
 });
 
+export const signUpValidationController = async(req, res, next) => {
+  await signUpValidation(req, res, next)    
+};
+
 export const signinController = async (req, res) => {
-  const refreshSecret = process.env.JWT_REFRESH_KEY + req.user.password; // 1
-  const [token, refreshToken] = createTokens(
-    //2
-    {
-      id: req.user.id,
-      verified: req.user.verified,
-      blocked: req.user.blocked,
-      role: req.user.role
-    },
-    refreshSecret
-  );
-  const payload = { ...req.user, token, refreshToken };
-  createCookie(res, token, "__act", process.env.JWT_ACCESS_TOKEN_EXPIRES);
-  createCookie(
-    // 3
-    res,
-    refreshToken,
-    "__rt",
-    process.env.JWT_REFRESH_TOKEN_EXPIRES
-  );
+  
+  if(!req.user.verified) {
+    return res.status(400).json({
+      status: "error",
+      message: "User not verified please check you mail"
+    });  
+  }
+  const token = getToken({
+    id: req.user.id
+  });
+
+  const payload = {...req.user, token}
+
   return res.status(200).json({
     status: "success",
     message: "Login successfully",

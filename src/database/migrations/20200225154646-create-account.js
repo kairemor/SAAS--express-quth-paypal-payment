@@ -2,7 +2,7 @@ import uuid from "uuid/v4";
 
 module.exports = {
   up: (queryInterface, Sequelize) =>
-    queryInterface.createTable("Accounts", {
+    queryInterface.createTable("Users", {
       id: {
         allowNull: false,
         primaryKey: true,
@@ -30,11 +30,6 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       },
-      changedPassword: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

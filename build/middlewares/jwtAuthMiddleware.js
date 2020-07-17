@@ -22,7 +22,7 @@ var _createCookie = require("../lib/createCookie");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const {
-  Account
+  User
 } = _models.default;
 const jwtProtect = (0, _catchAsync.default)(async (req, res, next) => {
   const token = req.cookies.__act;
@@ -38,7 +38,7 @@ const jwtProtect = (0, _catchAsync.default)(async (req, res, next) => {
       return next(new _globalError.default("Your account has been blocked, contact system administrator ", 401));
     }
 
-    const freshUser = await (0, _index.findByPk)(Account, decoded.id);
+    const freshUser = await (0, _index.findByPk)(User, decoded.id);
 
     if (!freshUser) {
       return next(new _globalError.default("user from does not exist", 401));

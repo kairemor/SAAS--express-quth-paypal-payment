@@ -3,17 +3,15 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.signinController = exports.signupController = void 0;
+exports.signinController = exports.signUpValidationController = exports.signupController = void 0;
 
 var _lodash = _interopRequireDefault(require("lodash"));
 
 var _authService = require("../services/authService");
 
-var _generateToken = require("../lib/generateToken");
-
 var _catchAsync = _interopRequireDefault(require("../lib/catchAsync"));
 
-var _createCookie = require("../lib/createCookie");
+var _authenticate = require("../lib/authenticate");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -22,23 +20,26 @@ const signupController = (0, _catchAsync.default)(async (req, res, next) => {
 });
 exports.signupController = signupController;
 
-const signinController = async (req, res) => {
-  const refreshSecret = process.env.JWT_REFRESH_KEY + req.user.password; // 1
+const signUpValidationController = async (req, res, next) => {
+  await (0, _authService.signUpValidation)(req, res, next);
+};
 
-  const [token, refreshToken] = (0, _generateToken.createTokens)( //2
-  {
-    id: req.user.id,
-    verified: req.user.verified,
-    blocked: req.user.blocked,
-    role: req.user.role
-  }, refreshSecret);
+exports.signUpValidationController = signUpValidationController;
+
+const signinController = async (req, res) => {
+  if (!req.user.verified) {
+    return res.status(400).json({
+      status: "error",
+      message: "User not verified please check you mail"
+    });
+  }
+
+  const token = (0, _authenticate.getToken)({
+    id: req.user.id
+  });
   const payload = { ...req.user,
-    token,
-    refreshToken
+    token
   };
-  (0, _createCookie.createCookie)(res, token, "__act", process.env.JWT_ACCESS_TOKEN_EXPIRES);
-  (0, _createCookie.createCookie)( // 3
-  res, refreshToken, "__rt", process.env.JWT_REFRESH_TOKEN_EXPIRES);
   return res.status(200).json({
     status: "success",
     message: "Login successfully",

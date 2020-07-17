@@ -1,24 +1,23 @@
 // eslint-disable-next-line no-unused-vars
 import _ from "lodash";
 import Model from "../models";
-
+const jwt = require('jsonwebtoken');
 import GlobalError from "../lib/globalError";
-
 import { findUser } from "../services/index";
-import { comparePassord } from "../lib/passwordOp";
+import { comparePassword } from "../lib/passwordOp";
 
-const { Account } = Model;
+const { User } = Model;
 
 export const signinAuth = async (req, res, next) => {
   const { email, password } = req.body;
 
-  const user = await findUser(Account, email);
+  const user = await findUser(User, email);
 
   if (!user) {
     return next(new GlobalError("Invalid credential", 400));
   }
 
-  if (!(await comparePassord(password, user.password))) {
+  if (!(await comparePassword(password, user.password))) {
     return next(new GlobalError("Invalid credential", 400));
   }
 
@@ -34,3 +33,20 @@ export const signinAuth = async (req, res, next) => {
   req.user = user.toJSON();
   next();
 };
+
+
+export const verifyToken = ( req, res, next) => {
+  const token = req.query.key;
+  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
+    if (err && err.name === 'TokenExpiredError') {
+      const payload = jwt.verify(token, process.env.JWT_SECRET_KEY, {ignoreExpiration: true} );
+      req.err = err 
+      req.payload = payload 
+      next()
+    } else {
+      req.decoded = decoded;
+      req.token = token;
+      next();
+    }
+  });
+}

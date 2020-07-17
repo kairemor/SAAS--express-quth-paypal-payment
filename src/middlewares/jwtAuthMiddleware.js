@@ -6,7 +6,7 @@ import Model from "../models";
 import { findByPk } from "../services/index";
 import { createCookie } from "../lib/createCookie";
 
-const { Account } = Model;
+const { User } = Model;
 
 export const jwtProtect = catchAsync(async (req, res, next) => {
   const token = req.cookies.__act;
@@ -27,7 +27,7 @@ export const jwtProtect = catchAsync(async (req, res, next) => {
       );
     }
 
-    const freshUser = await findByPk(Account, decoded.id);
+    const freshUser = await findByPk(User, decoded.id);
     if (!freshUser) {
       return next(new GlobalError("user from does not exist", 401));
     }

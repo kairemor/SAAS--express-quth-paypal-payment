@@ -5,7 +5,7 @@ var _v = _interopRequireDefault(require("uuid/v4"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 module.exports = {
-  up: (queryInterface, Sequelize) => queryInterface.createTable("Accounts", {
+  up: (queryInterface, Sequelize) => queryInterface.createTable("Users", {
     id: {
       allowNull: false,
       primaryKey: true,
@@ -32,10 +32,6 @@ module.exports = {
     blocked: {
       type: Sequelize.BOOLEAN,
       defaultValue: false
-    },
-    changedPassword: {
-      type: Sequelize.STRING,
-      allowNull: true
     },
     createdAt: {
       allowNull: false,

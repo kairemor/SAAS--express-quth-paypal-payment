@@ -16,14 +16,14 @@ var _catchAsync = _interopRequireDefault(require("../lib/catchAsync"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const {
-  Account
+  User
 } = _models.default;
 const getAllUsers = (0, _catchAsync.default)(async (req, res, next) => {
-  const users = await (0, _services.findAll)(Account);
-  const body = users.map(user => _lodash.default.omit(user, ["password"]));
+  const users = await (0, _services.findAll)(User);
+  const body = users.map(user => _lodash.default.omit(user.toJSON(), ["password"]));
   return res.status(200).json({
     status: "success",
-    payload: users
+    payload: body
   });
 });
 exports.getAllUsers = getAllUsers;
