@@ -17,8 +17,8 @@ let transporter = nodemailer.createTransport({
 export const sendMailConfirmation = (dest, firstName , link) => {
   const message = `<div>
                     <h2> Hi ${firstName}, </h2> 
-                    <p> to validate your account click the bellow link </p>
-                    <p> ${link} </p> 
+                    <p> to validate your account click the bellow  <a href=${link}>link</a></p>
+                    <a href=${link}> click hear </a> 
                   </div>`;
   const mailOptions = {
     from: 'Node API <xeexcovid@gmail.com>', // Something like: Jane Doe <janedoe@gmail.com>

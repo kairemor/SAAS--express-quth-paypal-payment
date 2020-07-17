@@ -2,12 +2,12 @@ import uuid from "uuid/v4";
 
 module.exports = {
   up: (queryInterface, Sequelize) =>
-    queryInterface.createTable("Users", {
+    queryInterface.createTable("User", {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID,
-        defaultValue: uuid()
+        autoIncrement: true,
+        type: Sequelize.INTEGER,
       },
       firstName: {
         type: Sequelize.STRING
@@ -28,6 +28,11 @@ module.exports = {
       },
       blocked: {
         type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      isAdmin :{
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
         defaultValue: false
       },
       createdAt: {

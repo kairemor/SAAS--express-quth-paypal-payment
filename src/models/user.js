@@ -5,10 +5,9 @@ module.exports = (sequelize, DataTypes) => {
     "User",
     {
       id: {
-        allowNull: false,
         primaryKey: true,
-        type: DataTypes.UUID,
-        defaultValue: uuid()
+        type: DataTypes.INTEGER,
+        autoIncrement: true
       },
       firstName: {
         type: DataTypes.STRING,
@@ -20,7 +19,8 @@ module.exports = (sequelize, DataTypes) => {
       },
       email: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
       },
       password: {
         type: DataTypes.STRING,
@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: false
       }
     },
-    {}
+    {timeStamps: true}
   );
   User.associate = () => {
     // associations can be defined here

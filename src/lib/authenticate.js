@@ -27,7 +27,7 @@ export const jwtPassport = passport.use(new jwtStrategy(options, async (payload,
   } catch (error) {
     return done(error, false);
   }
-}));
+})); 
 
 export const verifyUser = passport.authenticate('jwt', {
   session: false
