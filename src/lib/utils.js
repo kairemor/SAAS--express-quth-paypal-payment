@@ -33,9 +33,10 @@ export const sendMail = (dest, subject, message) => {
   return new Promise((resolve, reject) => {
     transporter.sendMail(mailOptions, (err, info) => {
       if (err) {
-        console.log(err);
+        console.log("err mail send", err);
         reject(err)
       }
+      console.log("mail send")
       resolve(true)
     });
   });
