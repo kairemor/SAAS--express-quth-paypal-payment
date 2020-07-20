@@ -1,8 +1,16 @@
 import Model from "../models";
 import _ from "lodash";
-import { findOrCreate, findUser } from "./index";
+import { findOrCreate, findUser, update } from "./index";
 import { hashPassword } from "../lib/passwordOp";
-import { validateEmail, sendMailConfirmation, validatePassword, validateFieldLength, verifyToken } from "../lib/utils";
+import { validateEmail, 
+          sendMailConfirmation, 
+          validatePassword, 
+          validateFieldLength, 
+          sendResetPassword,
+          getValidationLink,
+          resetPasswordLink,
+          sendMail
+        } from "../lib/utils";
 import { getToken } from '../lib/authenticate';
 import catchAsync from "../lib/catchAsync";
 
@@ -74,21 +82,77 @@ export const signupService = catchAsync(async (req, res, next) => {
 
 export const signUpValidation = async(req, res, next) => {
   
-  if(req.err) {
-    const protocole = req.protocol
-    const host = req.get('host')
+  if(req.err) {    
     const user = await findUser(User, req.payload.email) 
-    const newToken = getToken(user.toJSON())
-    const link = `${protocole}://${host}/api/v1/auth/validate/?key=${newToken}`
-    await sendMailConfirmation(user.toJSON().email, user.toJSON().firstName, link)
+    const userData = user.toJSON()
+    const link = getValidationLink(req, userData)
+    await sendMailConfirmation(userData.email, userData.firstName, link)
     return res.status(400).json({
       status: "error",
       message: "url expired we sent you a link back"
     })
   }
-  User.update({verified: true}, {where: {id: req.decoded.id}})
+  update(User, req.decoded.id, {verified: true})
   return res.status(200).json({
     status: "success",
     message: "user successfully validate",
+  })
+}
+
+export const passwordReset = async(req, res, next) => {
+  const email = req.body.email;
+
+  const user = await findUser(User, email)
+
+  if(!user) {
+    return res.status(400).json({
+      status: "error",
+      message: "No account found with this email please register"
+    })
+  }
+
+  const link = resetPasswordLink(req, user.toJSON())
+  await sendResetPassword(email, user.toJSON().firstName, link)
+
+  return res.status(200).json({
+    status: "success",
+    message: "Check your email to reset your password"
+  })
+}
+
+export const passwordResetConfirmation =  async(req, res, next) => {
+  console.log("body", req.body)
+  if (!validatePassword(req.body.password)) {
+    return res.status(400).json({
+      status: "error",
+      message: "Password length should be more than 8 characters"
+    });
+  }
+
+  if (req.body.password != req.body.confirmPassword) {
+    return res.status(400).json({
+      status: "error",
+      message: "password and passwordConfirm are not the same"
+    });
+  }
+
+  if(req.err) {
+    const user = await findUser(User, req.payload.email) 
+    const userData = user.toJSON()
+    const link = resetPasswordLink(req, userData)
+    await sendResetPassword(userData.email, userData.firstName, link)
+    return res.status(400).json({
+      status: "error",
+      message: "url expired we sent you a link back"
+    })
+  }
+
+  const user = await User.update({password: await hashPassword(req.body.password)}, {where: {id: req.decoded.id}})
+  await sendMail(req.decoded.email, 'Reset Password', "Your Password is reset with success")
+
+  return res.status(200).json({
+    status: "success",
+    payload: user,
+    message: "Your password is changed with success"
   })
 }

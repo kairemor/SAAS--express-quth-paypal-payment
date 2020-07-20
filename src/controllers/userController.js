@@ -1,16 +1,19 @@
-import _ from "lodash";
-import { findAll } from "../services";
-import Model from "../models";
 import catchAsync from "../lib/catchAsync";
+import * as userService from "../services/userService";
 
-const { User } = Model;
-
+/*
+  Controller to handle users recuperation 
+  it allow to get all users in the system 
+*/
 export const getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await findAll(User);
-  const body = users.map(user => _.omit(user.toJSON(), ["password"]));
-
-  return res.status(200).json({
-    status: "success",
-    payload: body
-  });
+  await userService.getAllUserService(req, res, next)
 });
+
+export const getUserByPk = catchAsync(async(req, res, next) => {
+  await userService.getUserByPkService(req, res, next)
+})
+
+export const updateUser =  catchAsync(async(req, res, next) => {
+  await userService.updateUserService(req, res, next)
+})
+

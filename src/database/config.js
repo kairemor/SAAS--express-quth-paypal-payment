@@ -1,6 +1,12 @@
 import dotenv from "dotenv";
 
 dotenv.config();
+
+/*
+  Setting database configuration with 
+  the database url for each environment
+*/
+
 module.exports = {
   development: {
     use_env_variable: true,

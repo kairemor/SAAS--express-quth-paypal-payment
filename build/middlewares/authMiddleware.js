@@ -23,6 +23,11 @@ const jwt = require('jsonwebtoken');
 const {
   User
 } = _models.default;
+/*
+  The middleware the handle user login 
+  check if given information are right and forward the user infomration 
+  in the request object 
+*/
 
 const signinAuth = async (req, res, next) => {
   const {
@@ -46,6 +51,11 @@ const signinAuth = async (req, res, next) => {
   req.user = user.toJSON();
   next();
 };
+/*
+  Middleware to verify is the token for user validation link 
+  and user reset password link  
+*/
+
 
 exports.signinAuth = signinAuth;
 

@@ -8,6 +8,11 @@ import { comparePassword } from "../lib/passwordOp";
 
 const { User } = Model;
 
+/*
+  The middleware the handle user login 
+  check if given information are right and forward the user infomration 
+  in the request object 
+*/
 export const signinAuth = async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -35,6 +40,10 @@ export const signinAuth = async (req, res, next) => {
 };
 
 
+/*
+  Middleware to verify is the token for user validation link 
+  and user reset password link  
+*/
 export const verifyToken = ( req, res, next) => {
   const token = req.query.key;
   jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {

@@ -1,8 +1,6 @@
-import uuid from "uuid/v4";
-
 module.exports = {
   up: (queryInterface, Sequelize) =>
-    queryInterface.createTable("User", {
+    queryInterface.createTable("Users", {
       id: {
         allowNull: false,
         primaryKey: true,
@@ -35,6 +33,15 @@ module.exports = {
         allowNull: false,
         defaultValue: false
       },
+      groupId: {
+        type: Sequelize.INTEGER,
+        onDelete: "CASCADE",
+        allowNull: false,
+        references: {
+          model: 'Groups',
+          key: 'id'
+        }
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -46,5 +53,5 @@ module.exports = {
         defaultValue: new Date()
       }
     }),
-  down: queryInterface => queryInterface.dropTable("Accounts")
+  down: queryInterface => queryInterface.dropTable("Users")
 };

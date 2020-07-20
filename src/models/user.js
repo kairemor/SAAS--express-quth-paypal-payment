@@ -1,5 +1,3 @@
-import uuid from "uuid/v4";
-
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
     "User",
@@ -44,8 +42,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     {timeStamps: true}
   );
-  User.associate = () => {
+  User.associate = function(models) {
     // associations can be defined here
+    User.belongsTo(models.Group, {
+      onDelete: "CASCADE",
+      foreignKey: {
+        allowNull: false
+      }
+    });
   };
   return User;
 };

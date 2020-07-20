@@ -8,11 +8,19 @@ var _dotenv = _interopRequireDefault(require("dotenv"));
 
 var _passport = _interopRequireDefault(require("passport"));
 
-var _cookieParser = _interopRequireDefault(require("cookie-parser"));
-
 var _swaggerUiExpress = _interopRequireDefault(require("swagger-ui-express"));
 
 var _cors = _interopRequireDefault(require("cors"));
+
+var _path = _interopRequireDefault(require("path"));
+
+var _connectFlash = _interopRequireDefault(require("connect-flash"));
+
+var _ejsMate = _interopRequireDefault(require("ejs-mate"));
+
+var _expressSession = _interopRequireDefault(require("express-session"));
+
+var _passportLocal = _interopRequireDefault(require("./lib/passportLocal"));
 
 var _openApiDocumentation = _interopRequireDefault(require("../openApiDocumentation.json"));
 
@@ -26,18 +34,42 @@ var _models = _interopRequireDefault(require("./models"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// import expressLayouts from 'express-ejs-layouts';
 _dotenv.default.config();
 
-const app = (0, _express.default)();
-app.use(_passport.default.initialize());
-app.use(_passport.default.session());
+(0, _passportLocal.default)(_passport.default);
+const app = (0, _express.default)(); // template engine 
+
+app.engine('ejs', _ejsMate.default);
+app.set('view engine', 'ejs'); // static files 
+
+app.use(_express.default.static(_path.default.resolve(__dirname, '../public/dist'))); // body parser and logger 
+
 app.use((0, _morgan.default)("dev"));
 app.use(_express.default.json());
 app.use(_express.default.urlencoded({
   extended: false
-}));
-app.use((0, _cookieParser.default)());
-app.use((0, _cors.default)());
+})); // Express session
+
+app.use((0, _expressSession.default)({
+  secret: 'secret',
+  resave: true,
+  saveUninitialized: true
+})); // Passport middleware
+
+app.use(_passport.default.initialize());
+app.use(_passport.default.session()); // app.use(cookieParser());
+
+app.use((0, _cors.default)()); // Connect flash
+
+app.use((0, _connectFlash.default)()); // Global variables
+
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  res.locals.error = req.flash('error');
+  next();
+});
 app.use('/api-docs', _swaggerUiExpress.default.serve, _swaggerUiExpress.default.setup(_openApiDocumentation.default));
 app.use(_routes.default);
 app.all("*", async (req, res, next) => {

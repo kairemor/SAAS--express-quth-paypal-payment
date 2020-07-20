@@ -2,8 +2,8 @@
   "swagger": "2.0",
   "info": {
     "version": "1.0.0",
-    "title": "Yet Another Node.js Blogg Application API",
-    "description": "Yet Another Node.js Blogg Application API",
+    "title": "Node Js express   API",
+    "description": "An Node.js Application API",
     "license": {
       "name": "MIT",
       "url": "https://opensource.org/licenses/MIT"
@@ -114,6 +114,27 @@
           }
         ]
       }
+    },
+    "/group": {
+      "get": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Get all group in system",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GroupAdd"
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
     }
   },
   "definitions": {
@@ -152,6 +173,16 @@
           "uniqueItems": true
         }, 
         "password": {
+          "type": "string"
+        }
+      }
+    },
+    "GroupAdd": {
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
           "type": "string"
         }
       }

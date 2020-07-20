@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.signinController = exports.signUpValidationController = exports.signupController = void 0;
+exports.passwordResetConfirmationController = exports.passwordResetController = exports.signinController = exports.signUpValidationController = exports.signupController = void 0;
 
 var _lodash = _interopRequireDefault(require("lodash"));
 
@@ -15,14 +15,28 @@ var _authenticate = require("../lib/authenticate");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/* 
+  controller for registration 
+  this handle user account creation 
+*/
 const signupController = (0, _catchAsync.default)(async (req, res, next) => {
   await (0, _authService.signupService)(req, res, next);
 });
+/*
+  controller to validate user account creation 
+  after user receive link with mail from  registration 
+*/
+
 exports.signupController = signupController;
 
 const signUpValidationController = async (req, res, next) => {
   await (0, _authService.signUpValidation)(req, res, next);
 };
+/*
+  controller to log in the system with credential 
+    username and password 
+*/
+
 
 exports.signUpValidationController = signUpValidationController;
 
@@ -46,5 +60,26 @@ const signinController = async (req, res) => {
     payload: _lodash.default.omit(payload, ["password"])
   });
 };
+/*
+  Controller to ask for password reset 
+*/
+
 
 exports.signinController = signinController;
+
+const passwordResetController = async (req, res, next) => {
+  await (0, _authService.passwordReset)(req, res, next);
+};
+/*
+  Password reset confirmation after click user link in  email
+  and send new password 
+*/
+
+
+exports.passwordResetController = passwordResetController;
+
+const passwordResetConfirmationController = async (req, res, next) => {
+  await (0, _authService.passwordResetConfirmation)(req, res, next);
+};
+
+exports.passwordResetConfirmationController = passwordResetConfirmationController;

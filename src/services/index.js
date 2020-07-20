@@ -6,6 +6,15 @@ export const findOrCreate = (model, payload) =>
     }
   });
 
+/*
+  Create a new for a given mode
+*/
+
+export const create = (model, payload) => model.create(payload)
+
+/*
+  Find user by email;
+*/
 export const findUser = (model, payload) =>
   model.findOne({
     where: {
@@ -16,4 +25,17 @@ export const findUser = (model, payload) =>
 
 export const findByPk = (model, id) => model.findByPk(id);
 
-export const findAll = model => model.findAll();
+/*
+  Get all record of a models
+*/
+export const findAll = (model, condition={}) => model.findAll(condition);
+
+/*
+  Update an model entity
+*/
+export const update = (model, id, payload) => model.update(
+  {
+    ...payload
+  },
+  { where: {id} }
+)

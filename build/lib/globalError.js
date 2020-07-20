@@ -5,6 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+/*
+  Global error handler to raise
+  error when there is one 
+*/
 class GlobalError extends Error {
   constructor(message, statusCode) {
     super(message);
