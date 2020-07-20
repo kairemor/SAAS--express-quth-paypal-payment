@@ -38,4 +38,10 @@ export const update = (model, id, payload) => model.update(
     ...payload
   },
   { where: {id} }
-)
+);
+
+/*
+  Delete an record with a model 
+*/
+
+export const deleteByPk = (model, id) => model.delete({where: {id}})

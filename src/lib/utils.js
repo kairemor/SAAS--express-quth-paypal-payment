@@ -14,6 +14,9 @@ export function validateEmail(email) {
 */
 let transporter = nodemailer.createTransport({
   service: 'gmail',
+  port: 465,
+  secure: true,
+  ignoreTLS: false,
   auth: {
     user: 'xeexcovid@gmail.com',
     pass: 'XeexCovid@2019'
