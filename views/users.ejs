@@ -16,6 +16,7 @@
                   <th>Email</th>
                   <th>Account verified</th>
                   <th>Join Us</th>
+                  <th>Action</th>
               </tr>
               </thead>
               <!-- <tfoot>
@@ -34,7 +35,8 @@
                       <td><%= user.lastName %></td>
                       <td><%= user.email %></td>
                       <td><%= user.verified %></td>
-                      <td><%= user.createdAt %></td>
+                      <td><%= moment(user.createdAt).format('Do MMMM, YYYY'); %></td>
+                      <td><i class="fa fa-trash" aria-hidden="true"></i> <i class="fa fa-pencil-square-o" aria-hidden="true"></i> </td>
                   </tr>
                 <% }); %>
               </tbody>

@@ -11,6 +11,7 @@
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Action</th>
               </tr>
               </thead>
               <!-- <tfoot>
@@ -26,6 +27,7 @@
                 <% groups.forEach((group) => { %>
                   <tr>
                       <td><%= group.name %></td>
+                      <td><i class="fa fa-trash" aria-hidden="true"></i> <i class="fa fa-pencil-square-o" aria-hidden="true"></i> </td>
                   </tr>
                 <% }); %>
               </tbody>

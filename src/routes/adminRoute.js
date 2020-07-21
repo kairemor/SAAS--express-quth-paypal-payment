@@ -1,15 +1,12 @@
 import { Router } from "express";
+import moment from "moment";
 import {ensureAuthenticated} from '../lib/authenticate';
 import Model from '../models';
-import { findAll } from "../services";
+import { findAll, create} from "../services";
 import { validateEmail, 
   sendMailConfirmation, 
   validatePassword, 
   validateFieldLength, 
-  sendResetPassword,
-  getValidationLink,
-  resetPasswordLink,
-  sendMail
 } from "../lib/utils";
 import { findOrCreate } from "../services";
 import { hashPassword } from "../lib/passwordOp";
@@ -27,7 +24,8 @@ router.get('/dashboard', ensureAuthenticated, (req, res) =>
 router.get('/users', ensureAuthenticated, async(req, res) => {
   const users = await findAll(User)
   res.render('users', {
-    users: users
+    users: users,
+    moment: moment
   })
   }
 );
@@ -101,4 +99,12 @@ router.get('/group', ensureAuthenticated, async(req, res) => {
   }
 );
 
+router.get('/create-group', ensureAuthenticated, async(req, res) => {
+  res.render('addGroup')
+})
+
+router.post('/create-group', ensureAuthenticated, async(req, res) => {
+  await create(Group, req.body)
+  res.redirect('/admin/group')
+})
 export default router;
