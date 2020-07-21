@@ -16,6 +16,9 @@ import catchAsync from "../lib/catchAsync";
 
 const { User } = Model;
 
+export const createUser = async(req, res) => {
+
+}
 export const signupService = catchAsync(async (req, res, next) => {
   if ( !validatePassword(req.body.password)) {
     return res.status(400).json({

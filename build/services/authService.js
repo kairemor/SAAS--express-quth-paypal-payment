@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.passwordResetConfirmation = exports.passwordReset = exports.signUpValidation = exports.signupService = void 0;
+exports.passwordResetConfirmation = exports.passwordReset = exports.signUpValidation = exports.signupService = exports.createUser = void 0;
 
 var _models = _interopRequireDefault(require("../models"));
 
@@ -24,6 +24,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const {
   User
 } = _models.default;
+
+const createUser = async (req, res) => {};
+
+exports.createUser = createUser;
 const signupService = (0, _catchAsync.default)(async (req, res, next) => {
   if (!(0, _utils.validatePassword)(req.body.password)) {
     return res.status(400).json({
