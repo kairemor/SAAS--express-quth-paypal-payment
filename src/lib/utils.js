@@ -1,5 +1,22 @@
 import nodemailer from 'nodemailer';
+import { google } from "googleapis";
+const OAuth2 = google.auth.OAuth2;
+
 import { getToken } from '../lib/authenticate';
+
+// 
+
+const oauth2Client = new OAuth2(
+  "348561081642-0hqt0s7iqr8veobhq5gj35b425ccv5g4.apps.googleusercontent.com", // ClientID
+  "BQIpGMZlOUSGEoSVuch-ukGk", // Client Secret
+  "https://developers.google.com/oauthplayground" // Redirect URL
+);
+
+oauth2Client.setCredentials({
+  refresh_token: "1//04m7su3tcMoBLCgYIARAAGAQSNwF-L9IrbVVs4NqWH8fJU2RxI8o7g18587Z-pp6_j9DTgjO9ekmGkPk3jL0jyxxrk68geXL6qxg"
+});
+const accessToken = oauth2Client.getAccessToken()
+
 
 /*
 `Check  if the email registration is in the right email way
@@ -13,14 +30,15 @@ export function validateEmail(email) {
   transporter that send email 
 */
 let transporter = nodemailer.createTransport({
-  service: 'gmail',
-  port: 465,
-  secure: true,
-  ignoreTLS: false,
+  service: "gmail",
   auth: {
-    user: 'xeexcovid@gmail.com',
-    pass: 'XeexCovid@2019'
-  }
+    type: "OAuth2",
+    user: "xeexcovid@gmail.com", 
+    clientId: "348561081642-0hqt0s7iqr8veobhq5gj35b425ccv5g4.apps.googleusercontent.com",
+    clientSecret: "BQIpGMZlOUSGEoSVuch-ukGk",
+    refreshToken: "1//04m7su3tcMoBLCgYIARAAGAQSNwF-L9IrbVVs4NqWH8fJU2RxI8o7g18587Z-pp6_j9DTgjO9ekmGkPk3jL0jyxxrk68geXL6qxg",
+    accessToken: accessToken
+  } 
 });
 
 /*

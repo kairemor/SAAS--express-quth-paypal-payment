@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.update = exports.findAll = exports.findByPk = exports.findUser = exports.create = exports.findOrCreate = void 0;
+exports.deleteByPk = exports.update = exports.findAll = exports.findByPk = exports.findUser = exports.create = exports.findOrCreate = void 0;
 
 const findOrCreate = (model, payload) => model.findOrCreate({
   where: {
@@ -58,5 +58,17 @@ const update = (model, id, payload) => model.update({ ...payload
     id
   }
 });
+/*
+  Delete an record with a model 
+*/
+
 
 exports.update = update;
+
+const deleteByPk = (model, id) => model.delete({
+  where: {
+    id
+  }
+});
+
+exports.deleteByPk = deleteByPk;
