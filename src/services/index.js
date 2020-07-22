@@ -1,6 +1,8 @@
 export const findOrCreate = (model, payload) =>
   model.findOrCreate({
-    where: { email: payload.email },
+    where: {
+      email: payload.email
+    },
     defaults: {
       ...payload
     }
@@ -28,20 +30,25 @@ export const findByPk = (model, id) => model.findByPk(id);
 /*
   Get all record of a models
 */
-export const findAll = (model, condition={}) => model.findAll(condition);
+export const findAll = (model, condition = {}) => model.findAll(condition);
 
 /*
   Update an model entity
 */
-export const update = (model, id, payload) => model.update(
-  {
-    ...payload
-  },
-  { where: {id} }
-);
+export const update = (model, id, payload) => model.update({
+  ...payload
+}, {
+  where: {
+    id
+  }
+});
 
 /*
   Delete an record with a model 
 */
 
-export const deleteByPk = (model, id) => model.delete({where: {id}})
+export const deleteByPk = (model, id) => model.destroy({
+  where: {
+    id
+  }
+})

@@ -65,7 +65,7 @@ const update = (model, id, payload) => model.update({ ...payload
 
 exports.update = update;
 
-const deleteByPk = (model, id) => model.delete({
+const deleteByPk = (model, id) => model.destroy({
   where: {
     id
   }

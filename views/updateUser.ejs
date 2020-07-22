@@ -1,0 +1,87 @@
+<% layout('layout.ejs') %>
+
+<body class="bg-primary">
+  <div id="layoutAuthentication">
+    <div id="layoutAuthentication_content">
+      <main>
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-lg-7">
+              <div class="card shadow-lg border-0 rounded-lg mt-5">
+                <% include ./partials/messages %>
+                <div class="card-header">
+                  <h3 class="text-center font-weight-light my-4">Account information</h3>
+                </div>
+                <div class="card-body">
+                  <form method="POST">
+                    <div class="form-row">
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label class="small mb-1" for="inputFirstName">First Name</label>
+                          <input class="form-control py-4" id="inputFirstName" type="text"
+                            placeholder="Enter first name" name="firstName" value="<%= user.firstName %>" />
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label class="small mb-1" for="inputLastName">Last Name</label>
+                          <input class="form-control py-4" id="inputLastName" type="text" placeholder="Enter last name"
+                            name="lastName" value="<%= user.lastName %>" />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="small mb-1" for="inputEmailAddress">Email</label>
+                      <input class="form-control py-4" id="inputEmailAddress" type="email" aria-describedby="emailHelp"
+                        disabled name="email" value="<%= user.email %>" />
+                    </div>
+                    <div class="form-group">
+                      <div class="form-check">
+                        <% if(user.verified){ %>
+                        <input type='hidden' value="false" name='verified'>
+                        <input name="verified" checked value="true" type="checkbox" class="form-check-input"
+                          id="inputVerified">
+                        <% } else{ %>
+                        <input name="verified" value="true" type="checkbox" class="form-check-input" id="inputVerified">
+                        <% } %>
+                        <label class="form-check-label" for="inputVerified">Verified</label>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <div class="form-check">
+                        <% if(user.blocked){ %>
+                        <input type='hidden' value="false" name='blocked'>
+                        <input name="blocked" value="true" type="checkbox" class="form-check-input" id="inputBlocked">
+                        <% } else{ %>
+                        <input name="blocked" value="true" type="checkbox" class="form-check-input" id="inputBlocked">
+                        <% } %>
+                        <label class="form-check-label" for="inputBlocked">Blocked</label>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="inputState">Group</label>
+                      <select name="GroupId" id="inputState" class="form-control">
+                        <% groups.forEach((group) => { %>
+                        <% if (user.GroupId && user.GroupId === group.id) { %>
+                        <option selected value="<%= group.id %>"> <%= group.name %> </option>
+                        <% } else { %>
+                        <option value="<%= group.id %>"> <%= group.name %> </option>
+                        <% } %>
+
+                        <% }); %>
+                      </select>
+                    </div>
+                    <div class="form-group mt-4 mb-0"><input class="btn btn-primary btn-block" type="submit"
+                        value="Update"></div>
+                  </form>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
