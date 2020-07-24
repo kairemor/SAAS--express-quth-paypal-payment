@@ -1,7 +1,6 @@
 import axios from 'axios';
 import qs from 'querystring';
 import fs from 'fs';
-import path from 'path';
 
 axios.defaults.headers.common["Content-Type"] = "application/json"
 axios.defaults.headers.common["Accept-Language"] = "en_US"
@@ -46,6 +45,7 @@ const createProduct = async () => {
 
 // create all proposed plan for subscription 
 const createPlans = async () => {
+  const token = await getToken();
   const product_id = await createProduct()
   const plans = [
     // this is one plan
@@ -143,6 +143,7 @@ const createPlans = async () => {
   plans.forEach((plan, index) => {
     axios.post('https://api.sandbox.paypal.com/v1/billing/plans', plan, {
         headers: {
+          "Authorization": `Bearer ${token}`,
           "PayPal-Request-Id": "PLAN-18062020-001",
           "Prefer": "return=representation",
           "Accept": "application/json"
@@ -190,8 +191,8 @@ export const createSubscriptionPayPal = async (req, res, next) => {
         "payer_selected": "PAYPAL",
         "payee_preferred": "IMMEDIATE_PAYMENT_REQUIRED"
       },
-      "return_url": `https://${req.get('host')}/api/v1/payment/payment-success`,
-      "cancel_url": `https://${req.get('host')}/api/v1/payment/payment-error`
+      "return_url": `${req.protocol}://${req.get('host')}/api/v1/payment/payment-success`,
+      "cancel_url": `${req.protocol}://${req.get('host')}/api/v1/payment/payment-error`
     }
   }
 
