@@ -27,27 +27,27 @@ export const getPlansId = async (req, res, next) => {
 /*
   paypal Subscription to handle the subscription in a plan using paypal
 */
-export const paypalSubscription = async (req, res, next) => {
+export const paypalSubscription = catchAsync(async (req, res, next) => {
   await createSubscriptionPayPal(req, res, next)
-}
+})
 
 /*
   credit card Subscription to handle the subscription in a plan using credit card
 */
-export const creditCardSubscription = async (req, res, next) => {
+export const creditCardSubscription = catchAsync(async (req, res, next) => {
   await createSubscriptionCard(req, res, next)
-}
+})
 
 /*
   if payment success 
 */
-export const paymentSuccess = async (req, res, next) => {
+export const paymentSuccess = catchAsync(async (req, res, next) => {
   await paymentSuccessService(req, res, next)
-}
+})
 
 /*
   if payment error 
 */
-export const paymentError = async (req, res, next) => {
+export const paymentError = catchAsync(async (req, res, next) => {
   await paymentErrorService(req, res, next)
-}
+})
