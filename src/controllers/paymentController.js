@@ -3,6 +3,7 @@ import {
   createSubscriptionPayPal,
   createSubscriptionCard
 } from '../services/paymentService';
+import catchAsync from "../lib/catchAsync"
 
 /*
   get the id of your payment plans 
