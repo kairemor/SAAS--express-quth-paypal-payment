@@ -191,9 +191,7 @@ export const createSubscriptionPayPal = async (req, res, next) => {
       "payment_method": {
         "payer_selected": "PAYPAL",
         "payee_preferred": "IMMEDIATE_PAYMENT_REQUIRED"
-      },
-      "return_url": `${req.protocol}://${req.get('host')}/api/v1/payment/payment-success`,
-      "cancel_url": `${req.protocol}://${req.get('host')}/api/v1/payment/payment-error`
+      }
     }
   }
 
