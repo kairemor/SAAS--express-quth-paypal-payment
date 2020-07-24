@@ -171,6 +171,7 @@ createPlans()
 */
 export const createSubscriptionPayPal = async (req, res, next) => {
   const isoDate = new Date();
+  const token = await getToken();
   isoDate.setSeconds(isoDate.getSeconds() + 10);
   const subscription = {
     "plan_id": req.body.planId,
@@ -200,6 +201,7 @@ export const createSubscriptionPayPal = async (req, res, next) => {
   try {
     const result = await axios.post('https://api.sandbox.paypal.com/v1/billing/subscriptions', subscription, {
       headers: {
+        "Authorization": `Bearer ${token}`,
         "PayPal-Request-Id": "SUBSCRIPTION-21092020-001",
         "Prefer": "return=representation",
         "Accept": "application/json"
