@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.deleteByPk = exports.update = exports.findAll = exports.findByPk = exports.findUser = exports.create = exports.findOrCreate = void 0;
+exports.count = exports.deleteByPk = exports.update = exports.findAll = exports.findByPk = exports.findUser = exports.create = exports.findOrCreate = void 0;
 
 const findOrCreate = (model, payload) => model.findOrCreate({
   where: {
@@ -59,7 +59,7 @@ const update = (model, id, payload) => model.update({ ...payload
   }
 });
 /*
-  Delete an record with a model 
+  Delete an record by id 
 */
 
 
@@ -70,5 +70,13 @@ const deleteByPk = (model, id) => model.destroy({
     id
   }
 });
+/*
+  Count the occurrences of element for a given model 
+*/
+
 
 exports.deleteByPk = deleteByPk;
+
+const count = (model, condition = {}) => model.count(condition);
+
+exports.count = count;

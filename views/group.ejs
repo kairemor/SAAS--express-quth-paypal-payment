@@ -85,7 +85,7 @@
       $modalDiv.modal('hide').removeClass('loading');
     }, 500)
     $.ajax({ 
-      url : '/admin/users/delete/' + id ,
+      url : '/admin/group/users/' + id ,
       type: 'DELETE',
       success: function(result) {
         location.reload();

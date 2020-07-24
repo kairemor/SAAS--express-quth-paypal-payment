@@ -11,7 +11,8 @@ import {
   create,
   deleteByPk,
   findByPk,
-  update
+  update,
+  count
 } from "../services";
 import {
   validateEmail,
@@ -33,11 +34,33 @@ const {
 const router = Router();
 
 // Dashboard
-router.get('/dashboard', ensureAuthenticated, (req, res) =>
-  res.render('index', {
-    user: req.user
+router.get('/dashboard', ensureAuthenticated, async (req, res) => {
+  const numberUsers = await count(User)
+  const verifiedUsers = await count(User, {
+    where: {
+      verified: true
+    }
   })
-);
+  const unVerifiedUsers = await count(User, {
+    where: {
+      verified: false
+    }
+  })
+  const blockedUsers = await count(User, {
+    where: {
+      blocked: true
+    }
+  })
+  const numberGroups = await count(Group)
+  res.render('index', {
+    user: req.user,
+    numberUsers: numberUsers,
+    numberGroups: numberGroups,
+    verifiedUsers: verifiedUsers,
+    unVerifiedUsers: unVerifiedUsers,
+    blockedUsers: blockedUsers
+  })
+});
 // Users
 router.get('/users', ensureAuthenticated, async (req, res) => {
   const users = await findAll(User)
@@ -107,6 +130,17 @@ router.post('/create-user', ensureAuthenticated, async (req, res) => {
 router.delete('/users/delete/:id', ensureAuthenticated, async (req, res) => {
   deleteByPk(User, req.params.id)
     .then(async (result) => {
+      req.flash('success_msg', 'User remove in this group with success');
+      res.redirect(303, '/admin/dashboard')
+    })
+    .catch(err => req.flash('error_msg', `delete error: ${err}`))
+})
+
+router.delete('/group/users/:id', async (req, res) => {
+  update(User, req.params.id, {
+      GroupId: null
+    })
+    .then(result => {
       req.flash('success_msg', 'User deleted with success');
       res.redirect(303, '/admin/dashboard')
     })

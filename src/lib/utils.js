@@ -1,8 +1,12 @@
 import nodemailer from 'nodemailer';
-import { google } from "googleapis";
+import {
+  google
+} from "googleapis";
 const OAuth2 = google.auth.OAuth2;
 
-import { getToken } from '../lib/authenticate';
+import {
+  getToken
+} from '../lib/authenticate';
 
 // 
 
@@ -20,7 +24,7 @@ const accessToken = oauth2Client.getAccessToken()
 
 /*
 `Check  if the email registration is in the right email way
-*/ 
+*/
 export function validateEmail(email) {
   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(email) && email.length < 50;
@@ -33,12 +37,12 @@ let transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     type: "OAuth2",
-    user: "xeexcovid@gmail.com", 
+    user: "xeexcovid@gmail.com",
     clientId: "348561081642-0hqt0s7iqr8veobhq5gj35b425ccv5g4.apps.googleusercontent.com",
     clientSecret: "BQIpGMZlOUSGEoSVuch-ukGk",
     refreshToken: "1//04m7su3tcMoBLCgYIARAAGAQSNwF-L9IrbVVs4NqWH8fJU2RxI8o7g18587Z-pp6_j9DTgjO9ekmGkPk3jL0jyxxrk68geXL6qxg",
     accessToken: accessToken
-  } 
+  }
 });
 
 /*
@@ -67,7 +71,7 @@ export const sendMail = (dest, subject, message) => {
   The email with link to send when the user register 
 */
 
-export const sendMailConfirmation = async (dest, firstName , link) => {
+export const sendMailConfirmation = async (dest, firstName, link) => {
   const message = `<div>
                     <h2> Hi ${firstName}, </h2> 
                     <p> to validate your account click the bellow  <a href=${link}>link</a></p>
@@ -100,7 +104,7 @@ export const validatePassword = (password) => password.length < 50 && password.l
   Validate firstName and lastName length
 */
 
-export const validateFieldLength = (firstName, lastName) => lastName.length < 50 && firstName.length < 50
+export const validateFieldLength = (firstName, lastName) => firstName.length > 1 && lastName.length > 1 && lastName.length < 50 && firstName.length < 50
 
 
 /*

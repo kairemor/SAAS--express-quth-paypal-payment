@@ -44,7 +44,7 @@ export const update = (model, id, payload) => model.update({
 });
 
 /*
-  Delete an record with a model 
+  Delete an record by id 
 */
 
 export const deleteByPk = (model, id) => model.destroy({
@@ -52,3 +52,9 @@ export const deleteByPk = (model, id) => model.destroy({
     id
   }
 })
+
+/*
+  Count the occurrences of element for a given model 
+*/
+
+export const count = (model, condition = {}) => model.count(condition)

@@ -34,8 +34,10 @@ var _models = _interopRequireDefault(require("./models"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// import expressLayouts from 'express-ejs-layouts';
-_dotenv.default.config();
+_dotenv.default.config(); // require('./services/paypalService')
+
+
+require('./services/paymentService');
 
 (0, _passportLocal.default)(_passport.default);
 const app = (0, _express.default)(); // template engine 

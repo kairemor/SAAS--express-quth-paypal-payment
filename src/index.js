@@ -6,7 +6,6 @@ import swaggerUi from 'swagger-ui-express';
 import cors from 'cors';
 import path from 'path';
 import flash from 'connect-flash';
-// import expressLayouts from 'express-ejs-layouts';
 import ejsMate from 'ejs-mate';
 import session from 'express-session';
 import strategy from './lib/passportLocal'
@@ -17,6 +16,8 @@ import GlobalError from "./lib/globalError";
 import models from './models'
 dotenv.config();
 
+// require('./services/paypalService')
+require('./services/paymentService')
 strategy(passport)
 const app = express();
 
@@ -41,7 +42,7 @@ app.use(
     resave: true,
     saveUninitialized: true
   })
-);  
+);
 
 // Passport middleware
 app.use(passport.initialize());
@@ -85,4 +86,3 @@ models.sequelize.sync().then(() => {
     console.log(`server listen at port ${PORT}`);
   });
 })
-

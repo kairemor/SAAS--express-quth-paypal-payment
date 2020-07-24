@@ -37,7 +37,7 @@ export const signupService = catchAsync(async (req, res, next) => {
   if (!validateFieldLength(req.body.firstName, req.body.lastName)) {
     return res.status(400).json({
       status: "error",
-      message: "firstName and lastName length should be less than 50 characters"
+      message: "firstName and lastName length should be less than 50 characters and more than 1 character"
     });
     
   }
