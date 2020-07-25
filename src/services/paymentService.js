@@ -1,13 +1,22 @@
 import axios from 'axios';
 import qs from 'querystring';
 import fs from 'fs';
+import {
+  update
+} from '../services';
+import Models from '../models';
+
+const {
+  User
+} = Models
 
 axios.defaults.headers.common["Content-Type"] = "application/json"
 axios.defaults.headers.common["Accept-Language"] = "en_US"
 
+const baseAPIUrl = "https://api.sandbox.paypal.com/v1"
 // get token from client and secret id
-const getToken = async () => {
-  const result = await axios.post('https://api.sandbox.paypal.com/v1/oauth2/token', qs.stringify({
+export const getToken = async () => {
+  const result = await axios.post(`${baseAPIUrl}/oauth2/token`, qs.stringify({
     grant_type: 'client_credentials'
   }), {
     headers: {
@@ -35,8 +44,7 @@ const createProduct = async () => {
   }
   axios.defaults.headers.common["Authorization"] = `Bearer ${token}`
   try {
-    const result = await axios.post('https://api.sandbox.paypal.com/v1/catalogs/products', product)
-    console.log(result.data);
+    const result = await axios.post(`${baseAPIUrl}/catalogs/products`, product)
     return result.data.id
   } catch (err) {
     console.log(err);
@@ -96,7 +104,7 @@ const createPlans = async () => {
     {
       "product_id": product_id,
       "name": "Standard Plan",
-      "description": "Standandt plan",
+      "description": "Standard plan",
       "billing_cycles": [{
           "frequency": {
             "interval_unit": "MONTH",
@@ -125,7 +133,7 @@ const createPlans = async () => {
       "payment_preferences": {
         "auto_bill_outstanding": true,
         "setup_fee": {
-          "value": "10",
+          "value": "30",
           "currency_code": "USD"
         },
         "setup_fee_failure_action": "CONTINUE",
@@ -141,21 +149,23 @@ const createPlans = async () => {
   const data = {}
   data['product_id'] = product_id
   plans.forEach((plan, index) => {
-    axios.post('https://api.sandbox.paypal.com/v1/billing/plans', plan, {
+    axios.post(`${baseAPIUrl}/billing/plans`, plan, {
         headers: {
           "Authorization": `Bearer ${token}`,
-          "PayPal-Request-Id": "PLAN-18062020-001",
+          "PayPal-Request-Id": `PLAN-18062020-00${index+1}`,
           "Prefer": "return=representation",
           "Accept": "application/json"
         }
       })
       .then(result => {
-        console.log(result.data);
-        data[`plan_${index}`] = result.data.id
-        console.log(data);
+        data[`plan_${index}`] = {
+          id: result.data.id,
+          name: plan.name,
+          price: plan.payment_preferences.setup_fee.value,
+          interval_count: plan.billing_cycles[0].frequency.interval_count
+        }
         fs.writeFile('subscription_info.json', JSON.stringify(data), (err) => {
           if (err) console.error(err);
-          console.log('file written')
         });
       })
   });
@@ -192,12 +202,14 @@ export const createSubscriptionPayPal = async (req, res, next) => {
         "payer_selected": "PAYPAL",
         "payee_preferred": "IMMEDIATE_PAYMENT_REQUIRED"
       }
-    }
+    },
+    "return_url": `${req.protocol}://${req.get('host')}/api/v1/payment/success`,
+    "cancel_url": `${req.protocol}://${req.get('host')}/api/v1/payment/payment-success`,
   }
 
   const links = {};
   try {
-    const result = await axios.post('https://api.sandbox.paypal.com/v1/billing/subscriptions', subscription, {
+    const result = await axios.post(`${baseAPIUrl}/billing/subscriptions`, subscription, {
       headers: {
         "Authorization": `Bearer ${token}`,
         "PayPal-Request-Id": "SUBSCRIPTION-21092020-001",
@@ -212,6 +224,10 @@ export const createSubscriptionPayPal = async (req, res, next) => {
         'method': linkObj.method
       };
     })
+    const profileId = links['self'].href.split('/').pop()
+    await update(User, req.user.id, {
+      profileId: profileId
+    })
   } catch (error) {
     //capture HATEOAS links
     return res.status(400).json({
@@ -219,6 +235,11 @@ export const createSubscriptionPayPal = async (req, res, next) => {
       message: error
     })
   }
+
+  // axios.get(links['self'].href)
+  //   .then(sub => {
+  //     console.log(sub);
+  //   })
 
   //if redirect url present, redirect user
   if (links.hasOwnProperty('approve')) {
@@ -232,9 +253,12 @@ export const createSubscriptionPayPal = async (req, res, next) => {
   credit card subscription creation service 
 */
 export const createSubscriptionCard = async (req, res, next) => {
+  const isoDate = new Date();
+  const token = await getToken();
+  isoDate.setSeconds(isoDate.getSeconds() + 10);
   const subscription = {
     "plan_id": req.body.planId,
-    "start_time": new Date(),
+    "start_time": "" + isoDate.toISOString().slice(0, 19) + 'Z',
     "shipping_amount": {
       "currency_code": "USD",
       "value": "10.00"
@@ -261,15 +285,23 @@ export const createSubscriptionCard = async (req, res, next) => {
     }
   }
 
-  const result = await axios('https://api.sandbox.paypal.com/v1/billing/subscriptions', subscription)
+  const result = await axios(`${baseAPIUrl}/billing/subscriptions`, subscription, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
   console.log(result.data);
+  return res.status(200).json({
+    status: 'success',
+    payload: result.data
+  })
 }
 
 
-export const paymentSuccessService = async (req, res, next) => {
-  console.log(req.query.token)
-}
+// export const paymentSuccessService = async (req, res, next) => {
+//   console.log(req.query.token)
+// }
 
-export const paymentErrorService = async (req, res, next) => {
+// export const paymentErrorService = async (req, res, next) => {
 
-}
+// }

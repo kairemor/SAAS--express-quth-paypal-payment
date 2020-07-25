@@ -14,6 +14,7 @@ import apiRouter from "./routes";
 import errorHandler from "./lib/globalErrorHandler";
 import GlobalError from "./lib/globalError";
 import models from './models'
+import logger from './lib/logger';
 dotenv.config();
 
 // require('./services/paypalService')
@@ -82,7 +83,10 @@ const PORT = process.env.PORT || 3000;
 
 // sync() will create all table if they doesn't exist in database
 models.sequelize.sync().then(() => {
-  app.listen(PORT, () => {
-    console.log(`server listen at port ${PORT}`);
+  app.listen(PORT, (err) => {
+    if (err) {
+      return logger.error(err.message);
+    }
+    return logger.appStarted(process.env.PORT || 3000, 'localhost');
   });
 })

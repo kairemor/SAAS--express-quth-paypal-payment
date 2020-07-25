@@ -9,10 +9,6 @@ import paymentRouter from "./paymentRoute";
 import adminAuthRouter from "./adminAuthRoute"
 
 import {
-  createAgreementController,
-  processAgreement
-} from "../controllers/paypalController"
-import {
   verifyUser
 } from '../lib/authenticate'
 
@@ -24,7 +20,5 @@ apiRouter.use("/api/v1/group", verifyUser, groupRouter);
 apiRouter.use("/api/v1/payment", verifyUser, paymentRouter);
 apiRouter.use("/admin/auth", adminAuthRouter)
 apiRouter.use("/admin", adminRouter)
-apiRouter.get("/", createAgreementController)
-apiRouter.get("/processagreement", processAgreement)
 
 export default apiRouter;

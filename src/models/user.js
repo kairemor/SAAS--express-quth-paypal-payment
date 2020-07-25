@@ -1,7 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
-    "User",
-    {
+    "User", {
       id: {
         primaryKey: true,
         type: DataTypes.INTEGER,
@@ -29,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: false
       },
-      isAdmin :{
+      isAdmin: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false
@@ -38,11 +37,22 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false
+      },
+      profileId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
+      },
+      isSubscribed: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
       }
-    },
-    {timeStamps: true}
+    }, {
+      timeStamps: true
+    }
   );
-  User.associate = function(models) {
+  User.associate = function (models) {
     // associations can be defined here
     User.belongsTo(models.Group, {
       onDelete: "CASCADE",

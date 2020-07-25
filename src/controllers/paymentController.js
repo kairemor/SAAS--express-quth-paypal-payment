@@ -42,13 +42,13 @@ export const creditCardSubscription = catchAsync(async (req, res, next) => {
 /*
   if payment success 
 */
-export const paymentSuccess = catchAsync(async (req, res, next) => {
-  await paymentSuccessService(req, res, next)
-})
+// export const paymentSuccess = catchAsync(async (req, res, next) => {
+//   await paymentSuccessService(req, res, next)
+// })
 
 /*
   if payment error 
 */
-export const paymentError = catchAsync(async (req, res, next) => {
-  await paymentErrorService(req, res, next)
-})
+// export const paymentError = catchAsync(async (req, res, next) => {
+//   await paymentErrorService(req, res, next)
+// })

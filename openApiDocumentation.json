@@ -9,17 +9,18 @@
       "url": "https://opensource.org/licenses/MIT"
     }
   },
-  "servers": [
-    {"url": "http://localhost:3000"}, 
-    {"url": "https://node-api-auth.herokuapp.com"}
-  ],
-  "basePath": "/api/v1",
-  "tags": [
+  "servers": [{
+      "url": "http://localhost:3000"
+    },
     {
-      "name": "Users",
-      "description": "API for users in the system"
+      "url": "https://node-api-auth.herokuapp.com"
     }
   ],
+  "basePath": "/api/v1",
+  "tags": [{
+    "name": "Users",
+    "description": "API for users in the system"
+  }],
   "consumes": [
     "application/json"
   ],
@@ -34,7 +35,7 @@
         "bearerFormat": "JWT"
       }
     }
-  }, 
+  },
   "paths": {
     "/auth/signup": {
       "post": {
@@ -42,16 +43,14 @@
           "Users"
         ],
         "description": "Register in the system ",
-        "parameters": [
-          {
-            "name": "user",
-            "in": "body",
-            "description": "User registered",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
+        "parameters": [{
+          "name": "user",
+          "in": "body",
+          "description": "User registered",
+          "schema": {
+            "$ref": "#/definitions/User"
           }
-        ],
+        }],
         "produces": [
           "application/json"
         ],
@@ -71,16 +70,14 @@
           "Users"
         ],
         "description": "Login in system",
-        "parameters": [
-          {
-            "name": "user",
-            "in": "body",
-            "description": "User registered",
-            "schema": {
-              "$ref": "#/definitions/UserSignin"
-            }
+        "parameters": [{
+          "name": "user",
+          "in": "body",
+          "description": "User registered",
+          "schema": {
+            "$ref": "#/definitions/UserSignin"
           }
-        ],
+        }],
         "produces": [
           "application/json"
         ],
@@ -108,11 +105,28 @@
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
+        "security": [{
+          "bearerAuth": []
+        }]
+      }
+    },
+    "/user/{userId}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get all users in system",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
           }
-        ]
+        },
+        "security": [{
+          "bearerAuth": []
+        }]
       }
     },
     "/group": {
@@ -129,11 +143,95 @@
             }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
+        "security": [{
+          "bearerAuth": []
+        }]
+      }
+    },
+    "/group/{groupeId}": {
+      "get": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Get one group in system with id",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/GroupAdd"
+            }
           }
-        ]
+        },
+        "security": [{
+          "bearerAuth": []
+        }]
+      }
+    },
+    "/payment/plans": {
+      "get": {
+        "tags": [
+          "Payment"
+        ],
+        "summary": "Get all plan payment in system with id",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PlansResponse"
+            }
+          }
+        },
+        "security": [{
+          "bearerAuth": []
+        }]
+      }
+    },
+    "/payment/paypal": {
+      "post": {
+        "tags": [
+          "Payment"
+        ],
+        "parameters": [{
+          "name": "paypal payment plan",
+          "in": "body",
+          "description": "Give the id of the plans which user must subscribe",
+          "schema": {
+            "$ref": "#/definitions/PaypalPayment"
+          }
+        }],
+        "summary": "pay a subscription with paypal ",
+        "responses": {
+          "200": {
+            "description": "Redirect user to the paypal website to do payment"
+          }
+        },
+        "security": [{
+          "bearerAuth": []
+        }]
+      }
+    },
+    "/payment/credit-card": {
+      "post": {
+        "tags": [
+          "Payment with credit card"
+        ],
+        "parameters": [{
+          "name": "credit card payment plan",
+          "in": "body",
+          "description": "Give the id of the plans which user must subscribe",
+          "schema": {
+            "$ref": "#/definitions/CreditCardPayment"
+          }
+        }],
+        "summary": "pay a subscription with credit card ",
+        "responses": {
+          "200": {
+            "description": "return subscription information"
+          }
+        },
+        "security": [{
+          "bearerAuth": []
+        }]
       }
     }
   },
@@ -171,7 +269,7 @@
         "email": {
           "type": "string",
           "uniqueItems": true
-        }, 
+        },
         "password": {
           "type": "string"
         }
@@ -183,6 +281,41 @@
       ],
       "properties": {
         "name": {
+          "type": "string"
+        }
+      }
+    },
+    "PlansResponse": {
+      "properties": {
+        "product_id": {
+          "type": "string"
+        },
+        "planId": {
+          "type": "string"
+        }
+      }
+    },
+    "PaypalPayment": {
+      "required": ["planId"],
+      "properties": {
+        "planId": {
+          "type": "string"
+        }
+      }
+    },
+    "CreditCardPayment": {
+      "required": ["planId", "number", "expiry", "security_code"],
+      "properties": {
+        "planId": {
+          "type": "string"
+        },
+        "number": {
+          "type": "string"
+        },
+        "expiry": {
+          "type": "string"
+        },
+        "security_code": {
           "type": "string"
         }
       }
