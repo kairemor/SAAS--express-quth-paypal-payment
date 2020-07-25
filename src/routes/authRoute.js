@@ -23,7 +23,7 @@ const authRouter = Router();
 
 authRouter.post("/signup", signupController);
 authRouter.get("/validate", verifyToken, signUpValidationController);
-authRouter.post("/signin", signinAuth, signinController);
+authRouter.post("/signin", signinAuth, checkSubscription, signinController);
 authRouter.post("/reset-password", passwordResetController);
 authRouter.put("/reset-password", verifyToken, passwordResetConfirmationController)
 authRouter.post("/admin/signin", signinAuth, verifyAdmin, signinController);

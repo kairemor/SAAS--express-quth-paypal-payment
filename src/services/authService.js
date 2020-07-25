@@ -1,26 +1,37 @@
 import Model from "../models";
 import _ from "lodash";
-import { findOrCreate, findUser, update } from "./index";
-import { hashPassword } from "../lib/passwordOp";
-import { validateEmail, 
-          sendMailConfirmation, 
-          validatePassword, 
-          validateFieldLength, 
-          sendResetPassword,
-          getValidationLink,
-          resetPasswordLink,
-          sendMail
-        } from "../lib/utils";
-import { getToken } from '../lib/authenticate';
+import {
+  findOrCreate,
+  findUser,
+  update
+} from "./index";
+import {
+  hashPassword
+} from "../lib/passwordOp";
+import {
+  validateEmail,
+  sendMailConfirmation,
+  validatePassword,
+  validateFieldLength,
+  sendResetPassword,
+  getValidationLink,
+  resetPasswordLink,
+  sendMail
+} from "../lib/utils";
+import {
+  getToken
+} from '../lib/authenticate';
 import catchAsync from "../lib/catchAsync";
 
-const { User } = Model;
+const {
+  User
+} = Model;
 
-export const createUser = async(req, res) => {
+export const createUser = catchAsync(async (req, res) => {
 
-}
+})
 export const signupService = catchAsync(async (req, res, next) => {
-  if ( !validatePassword(req.body.password)) {
+  if (!validatePassword(req.body.password)) {
     return res.status(400).json({
       status: "error",
       message: "Password length should be more than 8 characters"
@@ -39,7 +50,7 @@ export const signupService = catchAsync(async (req, res, next) => {
       status: "error",
       message: "firstName and lastName length should be less than 50 characters and more than 1 character"
     });
-    
+
   }
 
   const password = await hashPassword(req.body.password);
@@ -58,7 +69,7 @@ export const signupService = catchAsync(async (req, res, next) => {
     password,
     email
   });
-  
+
   if (!created) {
     return res.status(400).json({
       status: "fail",
@@ -73,20 +84,20 @@ export const signupService = catchAsync(async (req, res, next) => {
     const link = `${protocole}://${host}/api/v1/auth/validate/?key=${token}`
     await sendMailConfirmation(account.toJSON().email, account.toJSON().firstName, link)
   } catch (error) {
-    
+
   }
   return res.status(201).json({
     status: "success",
     message: "user successfully created go and check you email to validate your account",
     payload: _.omit(account.toJSON(), ["password"])
-  }); 
+  });
 });
 
 
-export const signUpValidation = async(req, res, next) => {
-  
-  if(req.err) {    
-    const user = await findUser(User, req.payload.email) 
+export const signUpValidation = catchAsync(async (req, res, next) => {
+
+  if (req.err) {
+    const user = await findUser(User, req.payload.email)
     const userData = user.toJSON()
     const link = getValidationLink(req, userData)
     await sendMailConfirmation(userData.email, userData.firstName, link)
@@ -95,19 +106,21 @@ export const signUpValidation = async(req, res, next) => {
       message: "url expired we sent you a link back"
     })
   }
-  update(User, req.decoded.id, {verified: true})
+  update(User, req.decoded.id, {
+    verified: true
+  })
   return res.status(200).json({
     status: "success",
     message: "user successfully validate",
   })
-}
+})
 
-export const passwordReset = async(req, res, next) => {
+export const passwordReset = catchAsync(async (req, res, next) => {
   const email = req.body.email;
 
   const user = await findUser(User, email)
 
-  if(!user) {
+  if (!user) {
     return res.status(400).json({
       status: "error",
       message: "No account found with this email please register"
@@ -121,9 +134,9 @@ export const passwordReset = async(req, res, next) => {
     status: "success",
     message: "Check your email to reset your password"
   })
-}
+})
 
-export const passwordResetConfirmation =  async(req, res, next) => {
+export const passwordResetConfirmation = catchAsync(async (req, res, next) => {
   console.log("body", req.body)
   if (!validatePassword(req.body.password)) {
     return res.status(400).json({
@@ -139,8 +152,8 @@ export const passwordResetConfirmation =  async(req, res, next) => {
     });
   }
 
-  if(req.err) {
-    const user = await findUser(User, req.payload.email) 
+  if (req.err) {
+    const user = await findUser(User, req.payload.email)
     const userData = user.toJSON()
     const link = resetPasswordLink(req, userData)
     await sendResetPassword(userData.email, userData.firstName, link)
@@ -150,7 +163,13 @@ export const passwordResetConfirmation =  async(req, res, next) => {
     })
   }
 
-  const user = await User.update({password: await hashPassword(req.body.password)}, {where: {id: req.decoded.id}})
+  const user = await User.update({
+    password: await hashPassword(req.body.password)
+  }, {
+    where: {
+      id: req.decoded.id
+    }
+  })
   await sendMail(req.decoded.email, 'Reset Password', "Your Password is reset with success")
 
   return res.status(200).json({
@@ -158,4 +177,4 @@ export const passwordResetConfirmation =  async(req, res, next) => {
     payload: user,
     message: "Your password is changed with success"
   })
-}
+})

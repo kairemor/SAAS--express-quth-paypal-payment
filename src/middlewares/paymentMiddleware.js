@@ -4,6 +4,7 @@ import axios from "axios";
 import {
   update
 } from "../services"
+import catchAsync from "../lib/catchAsync"
 
 import {
   getToken
@@ -14,8 +15,9 @@ const {
   User
 } = Model;
 
-export const checkSubscription = async (req, res, next) => {
+export const checkSubscription = catchAsync(async (req, res, next) => {
   const token = await getToken()
+  console.log(token);
   if (req.user.profileId) {
     axios.get(`${baseAPIUrl}/billing/subscriptions/${req.user.profileId}`)
       .then(async (subscription) => {
@@ -44,4 +46,4 @@ export const checkSubscription = async (req, res, next) => {
   }
 
   next()
-}
+})
