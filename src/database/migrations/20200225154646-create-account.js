@@ -28,7 +28,17 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       },
-      isAdmin :{
+      isAdmin: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+      profileId: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        defaultValue: null
+      },
+      isSubscribed: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false
