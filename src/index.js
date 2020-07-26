@@ -8,6 +8,8 @@ import path from 'path';
 import flash from 'connect-flash';
 import ejsMate from 'ejs-mate';
 import session from 'express-session';
+import redis from 'redis';
+import redisConnect from 'connect-redis';
 import strategy from './lib/passportLocal'
 import openApiDocumentation from '../openApiDocumentation.json';
 import apiRouter from "./routes";
@@ -37,11 +39,16 @@ app.use(express.urlencoded({
 }));
 
 // Express session
+let RedisStore = redisConnect(session)
+let redisClient = redis.createClient(process.env.REDIS_URL)
 app.use(
   session({
     secret: 'secret',
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
+    store: new RedisStore({
+      client: redisClient
+    })
   })
 );
 

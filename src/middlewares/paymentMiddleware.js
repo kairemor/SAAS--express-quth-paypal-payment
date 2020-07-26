@@ -25,16 +25,9 @@ export const checkSubscription = catchAsync(async (req, res, next) => {
           await update(User, req.user.id, {
             isSubscribed: true
           })
-          fs.readFile('subscription_info.json', (error, data) => {
-            if (error) {
-              res.status(400).json({
-                status: 'error',
-                message: error
-              })
-            }
-
-            const plans = JSON.parse(data)
-
+        } else {
+          await update(User, req.user.id, {
+            isSubscribed: false
           })
         }
       }, {

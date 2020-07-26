@@ -5,6 +5,7 @@ import {
   update
 } from '../services';
 import Models from '../models';
+import catchAsync from '../lib/catchAsync';
 
 const {
   User
@@ -16,25 +17,28 @@ axios.defaults.headers.common["Accept-Language"] = "en_US"
 const baseAPIUrl = "https://api.sandbox.paypal.com/v1"
 // get token from client and secret id
 export const getToken = async () => {
-  const result = await axios.post(`${baseAPIUrl}/oauth2/token`, qs.stringify({
-    grant_type: 'client_credentials'
-  }), {
-    headers: {
-      "Accept": "application/json",
-      "Accept-Language": "en_US",
-    },
-    auth: {
-      username: process.env.PAYPAL_CLIENT_ID,
-      password: process.env.PAYPAL_CLIENT_SECRET
-    }
-  })
-
-  return result.data.access_token.toString()
+  try {
+    const result = await axios.post(`${baseAPIUrl}/oauth2/token`, qs.stringify({
+      grant_type: 'client_credentials'
+    }), {
+      headers: {
+        "Accept": "application/json",
+        "Accept-Language": "en_US",
+      },
+      auth: {
+        username: process.env.PAYPAL_CLIENT_ID,
+        password: process.env.PAYPAL_CLIENT_SECRET
+      }
+    })
+    return result.data.access_token.toString()
+  } catch (error) {
+    return error
+  }
 }
 
 
 // get product that tale plan 
-const createProduct = async () => {
+const createProduct = catchAsync(async () => {
   const token = await getToken();
   const product = {
     "name": "Node api software",
@@ -47,12 +51,12 @@ const createProduct = async () => {
     const result = await axios.post(`${baseAPIUrl}/catalogs/products`, product)
     return result.data.id
   } catch (err) {
-    console.log(err);
+
   }
-}
+})
 
 // create all proposed plan for subscription 
-const createPlans = async () => {
+const createPlans = catchAsync(async () => {
   const token = await getToken();
   const product_id = await createProduct()
   const plans = [
@@ -148,29 +152,33 @@ const createPlans = async () => {
 
   const data = {}
   data['product_id'] = product_id
-  plans.forEach((plan, index) => {
-    axios.post(`${baseAPIUrl}/billing/plans`, plan, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "PayPal-Request-Id": `PLAN-18062020-00${index+1}`,
-          "Prefer": "return=representation",
-          "Accept": "application/json"
-        }
-      })
-      .then(result => {
-        data[`plan_${index}`] = {
-          id: result.data.id,
-          name: plan.name,
-          price: plan.payment_preferences.setup_fee.value,
-          interval_count: plan.billing_cycles[0].frequency.interval_count
-        }
-        fs.writeFile('subscription_info.json', JSON.stringify(data), (err) => {
-          if (err) console.error(err);
-        });
-      })
-  });
+  try {
+    plans.forEach((plan, index) => {
+      axios.post(`${baseAPIUrl}/billing/plans`, plan, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "PayPal-Request-Id": `PLAN-18062020-00${index+1}`,
+            "Prefer": "return=representation",
+            "Accept": "application/json"
+          }
+        })
+        .then(result => {
+          data[`plan_${index}`] = {
+            id: result.data.id,
+            name: plan.name,
+            price: plan.payment_preferences.setup_fee.value,
+            interval_count: plan.billing_cycles[0].frequency.interval_count
+          }
+          fs.writeFile('subscription_info.json', JSON.stringify(data), (err) => {
+            if (err) console.error(err);
+          });
+        })
+    });
+  } catch (error) {
 
-}
+  }
+
+})
 /*
   create my product and include plan in the payment business environment
 */
@@ -290,7 +298,21 @@ export const createSubscriptionCard = async (req, res, next) => {
       Authorization: `Bearer ${token}`
     }
   })
-  console.log(result.data);
+
+  result.data.links.forEach((linkObj) => {
+    links[linkObj.rel] = {
+      'href': linkObj.href,
+      'method': linkObj.method
+    };
+  })
+  try {
+    const profileId = links['self'].href.split('/').pop()
+    await update(User, req.user.id, {
+      profileId: profileId
+    })
+  } catch (error) {
+
+  }
   return res.status(200).json({
     status: 'success',
     payload: result.data

@@ -10,6 +10,10 @@ import {
   comparePassword
 } from "../lib/passwordOp";
 
+import {
+  validateEmail
+} from "../lib/utils";
+
 const {
   User
 } = Model;
@@ -24,17 +28,26 @@ export const signinAuth = async (req, res, next) => {
     email,
     password
   } = req.body;
-  if (email.length < 5 || password.length < 8) {
-    return next(new GlobalError("Invalid credential", 400));
+  if (!validateEmail(email) || password.length < 8) {
+    return res.status(400).json({
+      status: "error",
+      message: "Invalid credential email or password not good format"
+    })
   }
   const user = await findUser(User, email);
 
   if (!user) {
-    return next(new GlobalError("Invalid credential", 400));
+    return res.status(400).json({
+      status: "error",
+      message: "Invalid credential email not good"
+    })
   }
 
   if (!(await comparePassword(password, user.password))) {
-    return next(new GlobalError("Invalid credential", 400));
+    return res.status(400).json({
+      status: "error",
+      message: "Invalid credential password not good"
+    })
   }
 
   if (user && user.toJSON().blocked) {
