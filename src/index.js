@@ -76,12 +76,17 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocumentation));
 app.use(apiRouter);
 
 app.all("*", async (req, res, next) => {
-  const err = new GlobalError(
-    `${req.originalUrl} does not exist on the server`,
-    404
-  );
+  // const err = new GlobalError(
+  //   `${req.originalUrl} does not exist on the server`,
+  //   404
+  // );
 
-  next(err);
+  // next(err);
+
+  return res.status(404).json({
+    status: "error",
+    message: `${req.originalUrl} does not exist on the server. go to /api-docs to see available endpoint`
+  })
 });
 
 app.use(errorHandler);
