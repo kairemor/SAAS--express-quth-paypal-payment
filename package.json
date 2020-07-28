@@ -10,7 +10,7 @@
     "server": "node ./build/index.js",
     "dev": "NODE_ENV=development npm-run-all build server",
     "prod": "NODE_ENV=production npm-run-all build server",
-    "watch:dev": "nodemon",
+    "watch:dev": "nodemon  ",
     "start": "npm run prod",
     "start:dev": "nodemon --exec babel-node src/index.js"
   },

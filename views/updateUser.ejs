@@ -47,15 +47,44 @@
                         <label class="form-check-label" for="inputVerified">Verified</label>
                       </div>
                     </div>
+
                     <div class="form-group">
                       <div class="form-check">
                         <% if(user.blocked){ %>
                         <input type='hidden' value="false" name='blocked'>
-                        <input name="blocked" value="true" type="checkbox" class="form-check-input" id="inputBlocked">
+                        <input name="blocked" checked value="true" type="checkbox" class="form-check-input"
+                          id="inputBlocked">
                         <% } else{ %>
                         <input name="blocked" value="true" type="checkbox" class="form-check-input" id="inputBlocked">
                         <% } %>
                         <label class="form-check-label" for="inputBlocked">Blocked</label>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <div class="form-check">
+                        <% if(user.isSubscribed){ %>
+                        <input type='hidden' value="false" name='isSubscribed'>
+                        <input name="isSubscribed" checked value="true" type="checkbox" class="form-check-input"
+                          id="inputisSubscribed">
+                        <% } else{ %>
+                        <input name="isSubscribed" value="true" type="checkbox" class="form-check-input"
+                          id="inputisSubscribed">
+                        <% } %>
+                        <label class="form-check-label" for="inputisSubscribed">Is Subscribed </label>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <div class="form-check">
+                        <% if(user.isAdmin){ %>
+                        <input type='hidden' value="false" name='isAdmin'>
+                        <input name="isAdmin" checked value="true" type="checkbox" class="form-check-input"
+                          id="inputIsAdmin">
+                        <% } else{ %>
+                        <input name="isAdmin" value="true" type="checkbox" class="form-check-input" id="inputIsAdmin">
+                        <% } %>
+                        <label class="form-check-label" for="inputIsAdmin"> Admin </label>
                       </div>
                     </div>
 
@@ -75,8 +104,9 @@
                     <div class="form-group mt-4 mb-0"><input class="btn btn-primary btn-block" type="submit"
                         value="Update"></div>
                   </form>
+                  <button id="generateKey" class="btn btn-info" value=<%= user.id %>>Generate Activation Key</button>
+                  <span id="key"></span>
                 </div>
-
               </div>
             </div>
           </div>
@@ -85,3 +115,20 @@
     </div>
   </div>
 </body>
+
+
+<% block('javascript').replace(`<script>
+  $('#generateKey').click(function (e) {
+    var id = $(this).attr("value");
+    $.ajax({ 
+      url : '/admin/users/generate-key/' + id ,
+      type: 'GET',
+      success: function(result) {
+        $('#key').html(result.key)
+      },
+      error: function(error) {
+        console.log(error)
+      }
+    })
+  });
+</script>`) %>

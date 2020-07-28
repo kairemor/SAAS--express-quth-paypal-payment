@@ -1,12 +1,17 @@
 import axios from 'axios';
 import qs from 'querystring';
+const jwt = require('jsonwebtoken');
 import fs from 'fs';
 import {
   update
 } from '../services';
 import Models from '../models';
-import catchAsync from '../lib/catchAsync';
-
+import {
+  getToken
+} from '../lib/authenticate';
+import {
+  sendMail
+} from "../lib/utils";
 const {
   User
 } = Models
@@ -16,7 +21,7 @@ axios.defaults.headers.common["Accept-Language"] = "en_US"
 
 const baseAPIUrl = "https://api.sandbox.paypal.com/v1"
 // get token from client and secret id
-export const getToken = async () => {
+export const getPaypalToken = async () => {
   try {
     const result = await axios.post(`${baseAPIUrl}/oauth2/token`, qs.stringify({
       grant_type: 'client_credentials'
@@ -32,32 +37,38 @@ export const getToken = async () => {
     })
     return result.data.access_token.toString()
   } catch (error) {
-    return error
+    console.log(error)
   }
 }
 
 
 // get product that tale plan 
-const createProduct = catchAsync(async () => {
-  const token = await getToken();
+const createProduct = async () => {
+  const token = await getPaypalToken();
   const product = {
     "name": "Node api software",
     "description": "Node api software",
     "type": "SERVICE",
     "category": "SOFTWARE"
   }
-  axios.defaults.headers.common["Authorization"] = `Bearer ${token}`
   try {
-    const result = await axios.post(`${baseAPIUrl}/catalogs/products`, product)
+    const result = await axios.post(`${baseAPIUrl}/catalogs/products`, product, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "PayPal-Request-Id": "PRODUCT-20202020-001"
+      }
+    })
     return result.data.id
   } catch (err) {
-
+    console.log("product creation error: ", err)
   }
-})
+}
+// const id = await createProduct()
+// console.log(id)
 
 // create all proposed plan for subscription 
-const createPlans = catchAsync(async () => {
-  const token = await getToken();
+const createPlans = async () => {
+  const token = await getPaypalToken();
   const product_id = await createProduct()
   const plans = [
     // this is one plan
@@ -148,6 +159,50 @@ const createPlans = catchAsync(async () => {
         "inclusive": false
       }
     },
+    // this is an other plan
+    {
+      "product_id": product_id,
+      "name": "Standard Plan",
+      "description": "Standard plan",
+      "billing_cycles": [{
+          "frequency": {
+            "interval_unit": "MONTH",
+            "interval_count": 6
+          },
+          "tenure_type": "TRIAL",
+          "sequence": 1,
+          "total_cycles": 1
+        },
+        {
+          "frequency": {
+            "interval_unit": "MONTH",
+            "interval_count": 6
+          },
+          "tenure_type": "REGULAR",
+          "sequence": 2,
+          "total_cycles": 12,
+          "pricing_scheme": {
+            "fixed_price": {
+              "value": "60",
+              "currency_code": "USD"
+            }
+          }
+        }
+      ],
+      "payment_preferences": {
+        "auto_bill_outstanding": true,
+        "setup_fee": {
+          "value": "60",
+          "currency_code": "USD"
+        },
+        "setup_fee_failure_action": "CONTINUE",
+        "payment_failure_threshold": 3
+      },
+      "taxes": {
+        "percentage": "10",
+        "inclusive": false
+      }
+    },
   ]
 
   const data = {}
@@ -178,7 +233,7 @@ const createPlans = catchAsync(async () => {
 
   }
 
-})
+}
 /*
   create my product and include plan in the payment business environment
 */
@@ -188,8 +243,8 @@ createPlans()
   Paypal subscription creation service 
 */
 export const createSubscriptionPayPal = async (req, res, next) => {
+  const token = await getPaypalToken();
   const isoDate = new Date();
-  const token = await getToken();
   isoDate.setSeconds(isoDate.getSeconds() + 10);
   const subscription = {
     "plan_id": req.body.planId,
@@ -220,7 +275,7 @@ export const createSubscriptionPayPal = async (req, res, next) => {
     const result = await axios.post(`${baseAPIUrl}/billing/subscriptions`, subscription, {
       headers: {
         "Authorization": `Bearer ${token}`,
-        "PayPal-Request-Id": "SUBSCRIPTION-21092020-001",
+        "PayPal-Request-Id": `SUBSCRIPTION-21092020-00${req.user.id}`,
         "Prefer": "return=representation",
         "Accept": "application/json"
       }
@@ -236,24 +291,42 @@ export const createSubscriptionPayPal = async (req, res, next) => {
     await update(User, req.user.id, {
       profileId: profileId
     })
+
+    setTimeout(async () => {
+      const subs = await axios.get(`${baseAPIUrl}/billing/subscriptions/${profileId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      if (subs.data.status === 'APPROVAL' || subs.data.status === 'ACTIVE') {
+        const activationKey = getToken(req.user.toJSON(), process.env.SUBSCRIPTION_SECRET_KEY)
+        await sendMail(req.user.email, 'Subscription in node API', `Hi, Your activation key is ${activationKey}`)
+      } else if (subs.data.status === 'APPROVAL_PENDING') {
+        setTimeout(async () => {
+          const subs = await axios.get(`${baseAPIUrl}/billing/subscriptions/${profileId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          })
+          if (subs.data.status === 'APPROVAL' || subs.data.status === 'ACTIVE') {
+            const activationKey = getToken(req.user.toJSON(), process.env.SUBSCRIPTION_SECRET_KEY)
+            await sendMail(req.user.email, 'Subscription in node API', `Hi, Your activation key is ${activationKey}`)
+          }
+        }, 1000 * 60 * 2)
+      }
+    }, 1000 * 60 * 1)
+
+    //if redirect url present, redirect user
+    if (links.hasOwnProperty('approve')) {
+      return res.redirect(links['approve'].href);
+    } else {
+      console.error('no redirect URI present');
+    }
   } catch (error) {
-    //capture HATEOAS links
     return res.status(400).json({
       status: "error",
       message: error
     })
-  }
-
-  // axios.get(links['self'].href)
-  //   .then(sub => {
-  //     console.log(sub);
-  //   })
-
-  //if redirect url present, redirect user
-  if (links.hasOwnProperty('approve')) {
-    return res.redirect(links['approve'].href);
-  } else {
-    console.error('no redirect URI present');
   }
 }
 
@@ -262,7 +335,7 @@ export const createSubscriptionPayPal = async (req, res, next) => {
 */
 export const createSubscriptionCard = async (req, res, next) => {
   const isoDate = new Date();
-  const token = await getToken();
+  const token = await getPaypalToken();
   isoDate.setSeconds(isoDate.getSeconds() + 10);
   const subscription = {
     "plan_id": req.body.planId,
@@ -293,32 +366,111 @@ export const createSubscriptionCard = async (req, res, next) => {
     }
   }
 
-  const result = await axios(`${baseAPIUrl}/billing/subscriptions`, subscription, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
-
-  result.data.links.forEach((linkObj) => {
-    links[linkObj.rel] = {
-      'href': linkObj.href,
-      'method': linkObj.method
-    };
-  })
   try {
+    const result = await axios(`${baseAPIUrl}/billing/subscriptions`, subscription, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    result.data.links.forEach((linkObj) => {
+      links[linkObj.rel] = {
+        'href': linkObj.href,
+        'method': linkObj.method
+      };
+    })
     const profileId = links['self'].href.split('/').pop()
     await update(User, req.user.id, {
       profileId: profileId
     })
-  } catch (error) {
 
+    const activationKey = getToken(req.user.toJSON(), process.env.SUBSCRIPTION_SECRET_KEY)
+    sendMail(req.user.email, 'Subscription in node API', `Hi, Your activation key is ${activationKey}`)
+
+    setTimeout(async () => {
+      const subs = await axios.get(`${baseAPIUrl}/billing/subscriptions/${profileId}`)
+      console.log(subs)
+      if (subs.data.status === 'APPROVAL') {
+        const activationKey = getToken(req.user.toJSON(), process.env.SUBSCRIPTION_SECRET_KEY)
+        sendMail(req.user.email, 'Subscription in node API', `Hi, Your activation key is ${activationKey}`)
+      }
+    }, 1000 * 60 * 2)
+    return res.status(200).json({
+      status: 'success',
+      payload: result.data
+    })
+  } catch (error) {
+    res.status(400).json({
+      status: 'error',
+      message: error.message
+    })
   }
-  return res.status(200).json({
-    status: 'success',
-    payload: result.data
-  })
 }
 
+
+/*
+  activation key validation  
+*/
+
+export const activationKeyValidation = async (req, res, next) => {
+  if (req.user.profileId) {
+    jwt.verify(req.body.key, process.env.SUBSCRIPTION_SECRET_KEY, async (err, decoded) => {
+      if (err && err.name === 'TokenExpiredError') {
+        res.status(400).json({
+          status: 'error',
+          message: `your key is no longer usable`
+        })
+      } else {
+
+        if (decoded.id === req.user.id) {
+          axios.get(`${baseAPIUrl}/billing/subscriptions/${req.user.profileId}`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            })
+            .then(async (subscription) => {
+              if (subscription.data.status === 'APPROVAL' || subscription.data.status === 'ACTIVE') {
+                await update(User, req.user.id, {
+                  isSubscribed: true
+                })
+                sendMail(req.user.email, 'Software access validation', `Hi ${req.user.firstName}, You can now access to software`)
+                return res.status(200).json({
+                  status: 'success',
+                  message: `you're account is now activate you can access full software`
+                })
+              } else {
+                return res.status(400).json({
+                  status: 'error',
+                  message: `Check your payment before`
+                })
+              }
+            })
+            .catch(err => console.log(err))
+        }
+      }
+    });
+  } else {
+    jwt.verify(req.body.key, process.env.SUBSCRIPTION_SECRET_KEY, async (err, decoded) => {
+      if (err) {
+        res.status(400).json({
+          status: 'error',
+          message: `your key is no longer usable`
+        })
+      } else {
+        if (decoded.id === req.user.id) {
+          await update(User, req.user.id, {
+            isSubscribed: true
+          })
+          sendMail(req.user.email, 'Software access validation', `Hi ${req.user.firstName}, You can now access to software`)
+          return res.status(200).json({
+            status: 'success',
+            message: `you're account is now activate you can access full software`
+          })
+        }
+      }
+    });
+  }
+}
 
 // export const paymentSuccessService = async (req, res, next) => {
 //   console.log(req.query.token)

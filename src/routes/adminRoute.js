@@ -3,6 +3,9 @@ import {
 } from "express";
 import moment from "moment";
 import {
+  Op
+} from "sequelize";
+import {
   ensureAuthenticated
 } from '../lib/authenticate';
 import Models from '../models';
@@ -26,6 +29,9 @@ import {
 import {
   hashPassword
 } from "../lib/passwordOp";
+import {
+  getToken
+} from '../lib/authenticate'
 
 const {
   User,
@@ -61,6 +67,7 @@ router.get('/dashboard', ensureAuthenticated, async (req, res) => {
     blockedUsers: blockedUsers
   })
 });
+
 // Users
 router.get('/users', ensureAuthenticated, async (req, res) => {
   const users = await findAll(User)
@@ -136,6 +143,47 @@ router.delete('/users/delete/:id', ensureAuthenticated, async (req, res) => {
     .catch(err => req.flash('error_msg', `delete error: ${err}`))
 })
 
+router.get('/users/generate-key/:id', async (req, res, next) => {
+  const user = await findByPk(User, req.params.id)
+  const token = getToken(user.toJSON(), process.env.SUBSCRIPTION_SECRET_KEY)
+  return res.json({
+    key: token
+  })
+})
+
+router.get('/users/subscribe', ensureAuthenticated, async (req, res) => {
+  try {
+    const subscribeUsers = await findAll(User, {
+      where: {
+        isSubscribed: true
+      }
+    })
+    return res.render('subscribeUsers', {
+      users: subscribeUsers,
+      moment: moment
+    })
+  } catch (error) {
+    console.log(error)
+  }
+})
+
+router.get('/users/expired', ensureAuthenticated, async (req, res) => {
+  try {
+    const expiredUsers = await findAll(User, {
+      where: {
+        isSubscribed: false
+      }
+    })
+    return res.render('expiredUsers', {
+      users: expiredUsers,
+      moment: moment
+    })
+  } catch (error) {
+    console.log(error)
+  }
+})
+
+
 router.delete('/group/users/:id', async (req, res) => {
   update(User, req.params.id, {
       GroupId: null
@@ -163,6 +211,12 @@ router.post('/users/:id', ensureAuthenticated, async (req, res) => {
   }
   if (typeof req.body.blocked === 'object') {
     req.body.blocked = req.body.blocked[1]
+  }
+  if (typeof req.body.isSubscribed === 'object') {
+    req.body.isSubscribed = req.body.isSubscribed[1]
+  }
+  if (typeof req.body.isAdmin === 'object') {
+    req.body.isAdmin = req.body.isAdmin[1]
   }
   console.log(req.body)
   try {

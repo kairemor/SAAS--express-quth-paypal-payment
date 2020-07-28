@@ -14,12 +14,11 @@ import strategy from './lib/passportLocal'
 import openApiDocumentation from '../openApiDocumentation.json';
 import apiRouter from "./routes";
 import errorHandler from "./lib/globalErrorHandler";
-import GlobalError from "./lib/globalError";
 import models from './models'
 import logger from './lib/logger';
 dotenv.config();
 
-// require('./services/paypalService')
+
 require('./services/paymentService')
 strategy(passport)
 const app = express();
@@ -76,13 +75,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocumentation));
 app.use(apiRouter);
 
 app.all("*", async (req, res, next) => {
-  // const err = new GlobalError(
-  //   `${req.originalUrl} does not exist on the server`,
-  //   404
-  // );
-
-  // next(err);
-
   return res.status(404).json({
     status: "error",
     message: `${req.originalUrl} does not exist on the server. go to /api-docs to see available endpoint`
@@ -92,6 +84,9 @@ app.all("*", async (req, res, next) => {
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
+process.on('unhandledRejection', reason => {
+  throw reason;
+});
 
 // sync() will create all table if they doesn't exist in database
 models.sequelize.sync().then(() => {

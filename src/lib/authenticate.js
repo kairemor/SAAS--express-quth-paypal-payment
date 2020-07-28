@@ -2,22 +2,26 @@ import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import passportJwt from 'passport-jwt';
 import Model from "../models";
-import { findByPk } from "../services/index";
-import passportLocal from 'passport-local';
+import {
+  findByPk
+} from "../services/index";
 
-const { User } = Model;
+const {
+  User
+} = Model;
 
 const jwtStrategy = passportJwt.Strategy;
 const extractJwt = passportJwt.ExtractJwt;
-const LocalStrategy = passportLocal.Strategy;
 
 
 /*
   Get token from payload which is the user data
 */
 
-export const getToken = (user) => {
-  return jwt.sign(user, process.env.JWT_SECRET_KEY,  { expiresIn: '1h' });
+export const getToken = (user, jwt_secret = process.env.JWT_SECRET_KEY) => {
+  return jwt.sign(user, jwt_secret, {
+    expiresIn: '1h'
+  });
 };
 
 const options = {
@@ -32,12 +36,12 @@ const options = {
 export const jwtPassport = passport.use(new jwtStrategy(options, async (payload, done) => {
   try {
     const user = await findByPk(User, payload.id)
-    if(user) return done(null, user);
+    if (user) return done(null, user);
     else return done(null, false);
   } catch (error) {
     return done(error, false);
   }
-})); 
+}));
 
 /*
   verify if user is authenticate before getting 
@@ -76,7 +80,7 @@ export const forwardAuthenticated = (req, res, next) => {
   if (!req.isAuthenticated()) {
     return next();
   }
-  res.redirect('/admin/dashboard');      
+  res.redirect('/admin/dashboard');
 }
 
 // 

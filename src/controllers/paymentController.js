@@ -1,7 +1,8 @@
 import fs from 'fs';
 import {
   createSubscriptionPayPal,
-  createSubscriptionCard
+  createSubscriptionCard,
+  activationKeyValidation
 } from '../services/paymentService';
 import catchAsync from "../lib/catchAsync"
 
@@ -38,6 +39,14 @@ export const paypalSubscription = catchAsync(async (req, res, next) => {
 export const creditCardSubscription = catchAsync(async (req, res, next) => {
   await createSubscriptionCard(req, res, next)
 })
+
+/*
+  Payment validation after receive a key 
+*/
+
+export const activationKeyController = async (req, res, next) => {
+  await activationKeyValidation(req, res, next)
+}
 
 /*
   if payment success 
