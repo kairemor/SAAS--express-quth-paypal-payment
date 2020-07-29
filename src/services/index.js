@@ -25,7 +25,7 @@ export const findUser = (model, payload) =>
     logging: false
   });
 
-export const findByPk = (model, id) => model.findByPk(id);
+export const findByPk = (model, id, condition = {}) => model.findByPk(id, condition);
 
 /*
   Get all record of a models
@@ -58,3 +58,13 @@ export const deleteByPk = (model, id) => model.destroy({
 */
 
 export const count = (model, condition = {}) => model.count(condition)
+
+/*
+find activation by key
+*/
+
+export const findByKey = (model, key) => model.findOne({
+  where: {
+    key: key
+  }
+})

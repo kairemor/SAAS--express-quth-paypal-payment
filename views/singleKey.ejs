@@ -1,0 +1,11 @@
+<% layout('layout.ejs') %>
+<div class="container">
+  <div class="text-center">
+    <p>Email : <%= activation.User.email %> </p>
+    <p>Full Name : <%= activation.User.firstName %> <%= activation.User.lastName %> </p>
+  </div>
+
+  <div class="text-black-50">
+    <p><%= activation.key %></p>
+  </div>
+</div>

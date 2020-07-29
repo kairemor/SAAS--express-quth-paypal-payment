@@ -1,0 +1,38 @@
+<% layout('layout.ejs') %>
+
+<div class="card mb-4">
+  <div class="card-header">
+    <i class="fas fa-table mr-1"></i>
+    Generated activation keys
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        <thead>
+          <tr>
+            <th>email</th>
+            <th>key</th>
+            <th>used</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% activations.forEach((activation) => { %>
+          <tr>
+            <td>
+              <%= activation.User.email %>
+            </td>
+            <td>
+              <a href="/admin/generates-keys/<%= activation.id %> ">
+                <%= activation.key.substring(1, 30) %>...
+              </a>
+            </td>
+            <td>
+              <%= activation.used %>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

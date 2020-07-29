@@ -18,9 +18,9 @@ const extractJwt = passportJwt.ExtractJwt;
   Get token from payload which is the user data
 */
 
-export const getToken = (user, jwt_secret = process.env.JWT_SECRET_KEY) => {
+export const getToken = (user, jwt_secret = process.env.JWT_SECRET_KEY, validity = '1h') => {
   return jwt.sign(user, jwt_secret, {
-    expiresIn: '1h'
+    expiresIn: validity
   });
 };
 

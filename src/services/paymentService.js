@@ -1,9 +1,11 @@
 import axios from 'axios';
 import qs from 'querystring';
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import {
-  update
+  update,
+  findByKey,
+  create
 } from '../services';
 import Models from '../models';
 import {
@@ -12,8 +14,11 @@ import {
 import {
   sendMail
 } from "../lib/utils";
+
 const {
-  User
+  User,
+  Activation,
+  Subscription
 } = Models
 
 axios.defaults.headers.common["Content-Type"] = "application/json"
@@ -292,6 +297,18 @@ export const createSubscriptionPayPal = async (req, res, next) => {
       profileId: profileId
     })
 
+    const subscrip = await axios.get(`${baseAPIUrl}/billing/subscriptions/${profileId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    await create(Subscription, {
+      profile_id: subscrip.data.id,
+      plan_id: subscrip.data.plan_id,
+      start_time: subscrip.data.start_time
+    })
+
     setTimeout(async () => {
       const subs = await axios.get(`${baseAPIUrl}/billing/subscriptions/${profileId}`, {
         headers: {
@@ -457,11 +474,21 @@ export const activationKeyValidation = async (req, res, next) => {
           message: `your key is no longer usable`
         })
       } else {
+        const key = await findByKey(Activation, token)
+        if (key.used) {
+          return res.status(400).json({
+            status: 'error',
+            message: 'Your is already used'
+          })
+        }
         if (decoded.id === req.user.id) {
           await update(User, req.user.id, {
             isSubscribed: true
           })
           sendMail(req.user.email, 'Software access validation', `Hi ${req.user.firstName}, You can now access to software`)
+          await update(Activation, req.user.id, {
+            used: true
+          })
           return res.status(200).json({
             status: 'success',
             message: `you're account is now activate you can access full software`
@@ -471,11 +498,3 @@ export const activationKeyValidation = async (req, res, next) => {
     });
   }
 }
-
-// export const paymentSuccessService = async (req, res, next) => {
-//   console.log(req.query.token)
-// }
-
-// export const paymentErrorService = async (req, res, next) => {
-
-// }

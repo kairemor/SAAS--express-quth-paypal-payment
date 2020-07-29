@@ -35,7 +35,8 @@ import {
 
 const {
   User,
-  Group
+  Group,
+  Activation
 } = Models;
 const router = Router();
 
@@ -145,7 +146,20 @@ router.delete('/users/delete/:id', ensureAuthenticated, async (req, res) => {
 
 router.get('/users/generate-key/:id', async (req, res, next) => {
   const user = await findByPk(User, req.params.id)
+  const maxSetTimeOut = 2147483647
   const token = getToken(user.toJSON(), process.env.SUBSCRIPTION_SECRET_KEY)
+  await create(Activation, {
+    UserId: req.user.id,
+    key: token
+  })
+
+  setTimeout(async () => {
+    setTimeout(async () => {
+      update(User, req.user.id, {
+        isSubscribed: false
+      })
+    }, 1000 * 60 * 60 * 24 * 6)
+  }, maxSetTimeOut)
   return res.json({
     key: token
   })
@@ -205,7 +219,6 @@ router.get('/users/:id', ensureAuthenticated, async (req, res) => {
 })
 
 router.post('/users/:id', ensureAuthenticated, async (req, res) => {
-  console.log(typeof req.body.verified);
   if (typeof req.body.verified === 'object') {
     req.body.verified = req.body.verified[1]
   }
@@ -218,7 +231,6 @@ router.post('/users/:id', ensureAuthenticated, async (req, res) => {
   if (typeof req.body.isAdmin === 'object') {
     req.body.isAdmin = req.body.isAdmin[1]
   }
-  console.log(req.body)
   try {
     await update(User, req.params.id, req.body)
     req.flash('success_msg', 'User updated');
@@ -266,5 +278,27 @@ router.delete('/group/delete/:id', ensureAuthenticated, async (req, res) => {
     })
     .catch(err => req.flash('error_msg', `delete error: ${err}`))
 })
+
+// activation key 
+router.get('/generates-keys', async (req, res, next) => {
+  const activations = await findAll(Activation, {
+    include: User
+  })
+  res.render('generatedKey', {
+    activations: activations
+  })
+})
+
+router.get('/generates-keys/:id', async (req, res) => {
+  const activation = await findByPk(Activation, req.params.id, {
+    include: User
+  })
+
+  res.render('singleKey', {
+    activation: activation
+  })
+})
+
+
 
 export default router;

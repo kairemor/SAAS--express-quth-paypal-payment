@@ -60,6 +60,9 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       }
     });
+    User.hasMany(models.Activation, {
+      onDelete: "cascade"
+    })
   };
   return User;
 };
