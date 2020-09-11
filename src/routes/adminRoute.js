@@ -149,7 +149,7 @@ router.get('/users/generate-key/:id', async (req, res, next) => {
   const maxSetTimeOut = 2147483647
   const token = getToken(user.toJSON(), process.env.SUBSCRIPTION_SECRET_KEY)
   await create(Activation, {
-    UserId: req.user.id,
+    UserId: user.id,
     key: token
   })
 

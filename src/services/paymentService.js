@@ -317,6 +317,10 @@ export const createSubscriptionPayPal = async (req, res, next) => {
       })
       if (subs.data.status === 'APPROVAL' || subs.data.status === 'ACTIVE') {
         const activationKey = getToken(req.user.toJSON(), process.env.SUBSCRIPTION_SECRET_KEY)
+        await create(Activation, {
+          UserId: req.user.id,
+          key: activationKey
+        })
         await sendMail(req.user.email, 'Subscription in node API', `Hi, Your activation key is ${activationKey}`)
       } else if (subs.data.status === 'APPROVAL_PENDING') {
         setTimeout(async () => {
@@ -327,11 +331,31 @@ export const createSubscriptionPayPal = async (req, res, next) => {
           })
           if (subs.data.status === 'APPROVAL' || subs.data.status === 'ACTIVE') {
             const activationKey = getToken(req.user.toJSON(), process.env.SUBSCRIPTION_SECRET_KEY)
+            await create(Activation, {
+              UserId: req.user.id,
+              key: token
+            })
             await sendMail(req.user.email, 'Subscription in node API', `Hi, Your activation key is ${activationKey}`)
           }
         }, 1000 * 60 * 2)
       }
     }, 1000 * 60 * 1)
+
+    setTimeout(async () => {
+      const subs = await axios.get(`${baseAPIUrl}/billing/subscriptions/${profileId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      if (subs.data.status === 'APPROVAL' || subs.data.status === 'ACTIVE') {
+        const activationKey = getToken(req.user.toJSON(), process.env.SUBSCRIPTION_SECRET_KEY)
+        await create(Activation, {
+          UserId: req.user.id,
+          key: activationKey
+        })
+        await sendMail(req.user.email, 'Subscription in node API', `Hi, Your activation key is ${activationKey}`)
+      }
+    }, 1000 * 60 * 5)
 
     //if redirect url present, redirect user
     if (links.hasOwnProperty('approve')) {
@@ -474,7 +498,7 @@ export const activationKeyValidation = async (req, res, next) => {
           message: `your key is no longer usable`
         })
       } else {
-        const key = await findByKey(Activation, token)
+        const key = await findByKey(Activation, req.body.key)
         if (key.used) {
           return res.status(400).json({
             status: 'error',
